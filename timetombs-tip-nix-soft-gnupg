@@ -1,0 +1,3532 @@
+= Timetombs — Tip — Unix — Software — GnuPG
+
+
+[sidebar]
+******************************************
+[NOTE]
+.For me
+==========================================
+.Keys
+* ++BBF7++ -> master|primary key
+* ++DFDC++ -> subkey signature
+* ++FBB0++ -> subkey encryption
+* ++4889++ -> subkey authentication
+
+.Cards
+* ++3D7C++ -> card in the USB stick reader
+* ++3D7B++ -> card in the pinpad reader
+* ++3D7A++ -> card with (master|primary) key in the pinpad reader
+==========================================
+
+[NOTE]
+.For me (version longue)
+==========================================
+* master|primary key
++
+------------------------------------------
+ID: rsa4096/0x5A7A8A1FD04CBBF7 2016-10-22 [C] [expires: 2021-10-21]
+FP: B749 0067 9856 683B AC79  BF02 5A7A 8A1F D04C BBF7
+KG: 478BD067A0CA1DDF8360E49185BF993FBBBC83AE
+------------------------------------------
++
+* subkey signature
++
+------------------------------------------
+ID: rsa4096/0x954CD4C5CF0ADFDC 2016-10-22 [S] [expires: 2018-10-22]
+FP: BBED 735D 6230 738F 3D68  9B9B 954C D4C5 CF0A DFDC
+KG: 33EEE928F3689C91282AC312CC98BD9CDFA18619
+------------------------------------------
++
+* subkey encryption
++
+------------------------------------------
+ID: rsa3072/0xCA5B30F08255FBB0 2016-10-22 [E] [expires: 2018-10-22]
+FP: DE9B 8CBF 3AEB 1B51 799C  B2FD CA5B 30F0 8255 FBB0
+KG: 2F33F93A64A4C7DECDE1D6D25C78936078E77F72
+------------------------------------------
++
+* subkey authentication
++
+------------------------------------------
+ID: rsa4096/0xAC4BB2781CA64889 2016-10-22 [A] [expires: 2018-10-22]
+FP: CD9F 0FF7 9F05 BA88 6ECE  3EFD AC4B B278 1CA6 4889
+KG: EF265544EB6DF889D0829DC6F27C51BA5014D89C
+SSH: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDEL8oQSwSSL4LX6qcSFgl66uecgoa+sbrHJ762ghfknSd08h+JFD5340hlzmsZqw8156g36kkXC1/Zx5qn57RT4Zb+GXR5dIoCRHcGH54U/sJbEjR+9vib9Y50gyObjt4FbLhjm3heNoGTh2pW0GLKSqErsg7mF3kNIORipoC+TwaAYJPbKc+DgUw9lwG/0qBk/rEbsNIvZukLkDoTNWZNOAe23BxBE1jY6zTYGDlmOl/3MAB64e4/5BVgz7xtgtHLq/0b+UnNII9x7oV3D1QmAj65cGQKwWaoV7weYuPv8AALXLvX/PV43HE7lnRRFyZSFHv5jSYnQnLT3fU5IOLHfkEkwvyuEGgf6Hn1lKp4ScUXgXHcRbyzbbDUB0eb9qLgPKNHJu2pOCaz9xZ3fm+uXLeE3fPza0e9rSYXfc7UNNz2tSm1zgODeuDO9tk0gEUUIDFmWj62gcFIObHX7bh08XHJ44lEdJBYy7912LS+fHTuNFwkg8oaGuxL7w1uhEXkhaMRqd8Mx18mq3zyBvU6tP/vz5vEXbo65HQBtlAanRm3SGAJYSRDWYsvQjh/ew9SktmTgJT9O/rCqv1vBdfSLHbgHPMW1Z+qf/JovNrGUrZdyG67DEuiTA7njwz591VZyJ0t9gQRU6IqxSloDRSAv2nmxyvRUGBy6Zd/81GAqr== openpgp:0x1CA64889
+------------------------------------------
+
+++FP++: __fingerprint__
+++KG++: __keygrip__
+
+==========================================
+******************************************
+
+
+
+
+
+
+
+[[id_preamble]]
+== Preamble
+
+
+
+
+Why another document about __GnuPG__?
+
+Well, if it is just about setting up a key, one can read the (from quite good to absolutely excellent) documents listed in <<id_preamble_ressource>>.
+
+The goal of this document is first to provide a (functional) goal / use case (see <<id_preamble_overview>>. The remaining of the document tries to be consistent with that goals. This document also tries to always provide a “high level” view because one can quickly get losts in details.
+
+There is a important part about preparing for after the bus came (see <<id_share_key>>).
+
+Then once one can trust the key, one can build upon it (see <<id_usage>>).
+
+There are a few other things. And to finish this document is written for __GnuPG__ ++2.1.15++.
+
+
+
+
+[[id_preamble_todo]]
+=== TODO
+
+
+.Usage
+. what about remote signing|[de|en]crypting?
+ ** how do we open a booting remote container with a keyfile encrypted with GnuPG
+ ** Mutt
+. Mutt
+. Claws mail
+. Gajim
+ ** follow-up on bug met <<id_usage_gajim>>
+
+.GPG
+. revocation certificate usage
+. setup __Tor__ to communicate with key servers
+. setup virtual clean room environment
+ ** follow https://wiki.debian.org/OpenPGP/CleanRoomLiveEnvironment
+. document properly __/etc/skel/.gnupg/__
+
+
+
+
+[[id_preamble_prerequisite]]
+=== Pre-requisites
+
+
+
+
+[[id_preamble_prerequisite_hardware]]
+==== Hardware
+
+===== Smartcard
+
+* https://pcsclite.alioth.debian.org/ccid.html#readers[]
+* https://pcsclite.alioth.debian.org/select_readers/[]
+
+
+.Gemalto GemPC pinpad smartcard reader — __lsusb__
+------------------------------------------
+[SNIP]
+  iProduct                2 USB GemPCPinpad SmartCard Reader
+  idVendor           0x08e6 Gemalto (was Gemplus)
+  idProduct          0x3478 PinPad Smart Card Reader
+[SNIP]
+------------------------------------------
+
+
+.Gemalto GemPC smartcard reader — __lsusb__
+------------------------------------------
+[SNIP]
+  idVendor           0x08e6 Gemalto (was Gemplus)
+  idProduct          0x3438 GemPC Key SmartCard Reader
+[SNIP]
+------------------------------------------
+
+------------------------------------------
+$ /usr/sbin/pcscd --version
+pcsc-lite version 1.8.18.
+Copyright (C) 1999-2002 by David Corcoran <corcoran@musclecard.com>.
+Copyright (C) 2001-2015 by Ludovic Rousseau <ludovic.rousseau@free.fr>.
+Copyright (C) 2003-2004 by Damien Sauveron <sauveron@labri.fr>.
+Report bugs to <pcsclite-muscle@lists.alioth.debian.org>.
+Enabled features: Linux x86_64-pc-linux-gnu serial usb libudev usbdropdir=/usr/lib/pcsc/drivers ipcdir=/var/run/pcscd configdir=/etc/reader.conf.d
+$
+------------------------------------------
+
+
+Three cards :
+
+. ++0005 0000 3D7A++ or ++3D7B++ in the __GemPCPinpad smartcard reader__,
+. ++3D7B++ or ++3D7C++ in the USB key __GemPC key smartcard reader__.
+
+===== USB key
+
+One USB key to store the private keys once generated. Two is probably better but requires two different places to store them.
+
+
+[[id_preamble_prerequisite_software]]
+==== Software
+
+.Key management / __GnuPG__ (in clean room environment)
+* deb:__gnupg__ ++2.1.15++
+ ** which main dependency is deb:__libgcrypt__ ++1.7.3-2++ (++1.7.3-beta++)
+* deb:__haveged__ ++1.9.1-4++ -- generate more entropy for key generation
+
+.__GnuPGcard__ reader (in clean room environment)
+* deb:__pcscd__ ++1.8.18-1++ -- manage the __GnuPGcard__ reader
+* deb:__scdaemon__ ++2.1.15-4++ -- manage the __GnuPGcard__ reader
+* dependencies are at least:
+ ** deb:__libccid__ ++1.4.25-4++
+ ** deb:__libpcsclite__ ++1.8.18-1++
+
+.Secret sharing (in clean room environment)
+* deb:__ssss__ ++0.5-3++ -- to share a secret using Shamir's Secret Sharing Scheme
+* deb:__xxd__ ++8.0.0022-1++ -- (un)convert (from) to hexadecimal
+* deb:__enscript__ ++1.6.5.90-3++ -- convert text file into a postcript file
+
+
+.Key server management
+* deb:__dirmngr__ ++2.1.15-4++ -- manage access to key servers (see <<id_setup_keyserver_communication>>)
+* deb:__gnupg-curl__ ++1.4.20-6++ -- allow using hkps to communicate with key servers (see <<id_publickey_publication_keyserver>>)
+
+.Key publication
+* deb:__paperkey__ ++1.3-2++ -- allow paper backup (see <<id_backup_paperkey>>)
+* deb:__signing-party__ ++2.5-1++ -- allow bulk printing of key information for keysigning parties (see <<id_publickey_publication_signing_party>>)
+
+.Remote usage
+* deb:__openssh-client__ ≥ ++6.7++
+
+
+[[id_ipreamble_prerequisite_goal]]
+=== Goal / use case
+
+
+Use the __GnuPG__ keys as the most trusted corner stone of as many usages as possible
+
+. to encrypt passwords or “confidential” information,
+. to authenticate against SSH servers,
+. to sign or encrypt emails,
+. to open LUKS crypto-containers,
+. to open remote LUKS crypto-containers,
+. to sign __Git__ commits,
+. to authenticate locally,
+. to encrypt XMPP chats,
+. to login to a VPN.
+
+by
+
+. implementing best practicesfootnote:[The “s“ part is the difficult part; one must sometimes make a choice among different possibilities and still have the whole solution working properly.],
+. using __GnuPGcard__ to store private keys,
+ .. one (certification) __GnuPGcard__ with the master|primary key that
+    *** is used only within a pinpad reader,
+    *** is kept safely,
+    *** is only used for certification (other key signature) or subkey modification purpose,
+ .. one (daily) __GnuPGcard__ **without** the master|primary key that
+    *** stays at home,
+    *** is for all daily usages (encryption, signature and authentication),
+    *** only requires the ++--import <file_gpg_subkey>++ (or better the ++fetch++ for on-line machines) command as a prerequisite (and the __gpg.conf__ if possible).
+ .. another (daily) __GnuPGcard__ **without** the master|primary key that
+    *** is always with me in the USB reader, on my (physical) key ring,
+    *** has same usage as above; for all daily usages (encryption, signature and authentication),
+    *** only requires the ++--import <file_gpg_subkey>++ (or better the ++fetch++ for on-line machines) command as a prerequisite (and the __gpg.conf__ if possible).
+. having
+ .. a backup of the private key
+   *** on a USB stick,
+   *** on paperkey,
+   *** shared among trusted friends or family members,
+ .. a revocation certificate ready.
+. publishing (public) key
+ .. normaly,
+ .. using __Tor__.
+
+
+
+
+[[id_preamble_overview]]
+=== Process overview
+
+
+The key setup process is a bit lengthy but rather simple:
+
+. environment preparation
+[arabic]
+ .. setup a clean room environment (see <<id_setup_clean_room_environment>>),
+ .. be sure the physical reader and the smartcard are working fine (see <<id_setup_reader_card>>),
+ .. mount the USB key (see <<id_setup_clean_room_environment_usbkey>>) to be used as __$GNUPGHOME__,
+ .. check the configuration files __gpg.conf__ and __gpg-agent.conf__ are OK
+. generate keys
+[arabic]
+ .. a (primary|master) key (see <<id_setup_create_key_master>>),
+ .. a signature subkey (see <<id_setup_create_subkey_signature>>),
+ .. an encryption subkey (see <<id_setup_create_subkey_encryption>>),
+ .. an authentication subkey (see <<id_setup_create_subkey_authentication>>),
+. backup
+[arabic]
+ .. the (primary|master) key and its subkeys (see <<id_backup_key>>),
+ .. the revocation certificate (see <<id_backup_revocation_certificate>>),
+ .. the key trust (see <<id_backup_trust>>),
+ .. the printable / manual way (see <<id_backup_paperkey),
+. for each daily __GnuPGcard__
+[arabic]
+  .. import the original (master|primary) key (see <<id_setup2_gnupgcard_import_masterprimary_private_original>>)
+  .. move subkeys to the daily __GnuPGcard__ (++keytocard++) (see <<id_setup2_gnupgcard_move_subkey_to_daily_gnupgcard>> and <<id_setup2_gnupgcard_move_subkey_to_daily_gnupgcard_bis>>)
+  .. export subkeys; this step is already done at the backup stage (see <<id_backup_subkey_private>>),
+  .. remove (master|primary) key (see <<id_setup2_gnupgcard_remove_masterprimary_private_key>>),
+  .. import subkeys (that are actually stubs as they have been moved to the __GnuPGcard__ above) (see <<id_setup2_gnupgcard_import_subkey>>),
+  .. check (see <<id_final_check_gnupgcard_daily>>),
+  ** result
+    *** master|primary key is non-existant (neither on the machine nor on the __GnuPGcard__)
+    *** subkeys are on the __GnuPGcard__
+    *** ++gpg -K++ => __sec#__ and 3(__ssb>__)
+. for the certification __GnuPGcard__ (used only in pinpad reader)
+[arabic]
+  .. import the original (master|primary) key (see <<id_setup2_gnupgcard_import_masterprimary_private_original>>),
+  .. move the (master|primary) key to its __GnuPGcard__ (++keytocard++) (see <<id_setup2_gnupgcard_move_masterprimary_to_gnupgcard>>),
+  .. export subkeys; this step is already done at the backup stage (see <<id_backup_subkey_private>>),
+  .. delete (master|full) key (see <<id_setup2_gnupgcard_remove_masterprimary_private_key>>),
+  .. import subkeys (see <<id_setup2_gnupgcard_import_subkey>>),
+  .. check (see <<id_final_check_gnupgcard_cert>>),
+  ** result
+    *** master is on the __GnuPGcard__
+    *** subkeys are in $GNUPGHOME
+    *** ++gpg -K++ => __sec>__ and 3(__ssb__)
+
+Then come the steps of
+
+. backing up (see <<id_backup>>) of the
+[arabic]
+ .. private keys (see <<id_backup_key_private>>,
+ .. private subkeys (see <<id_backup_subkey_private>>),
+ .. private key on paper (see <<id_backup_paperkey>>),
+ .. trust (see <<id_backup_trust>>),
+. generating a revocation certificate (see <<id_backup_revocation_certificate>>),
+. backing up and making system wide the __GnuPG__ configuration (see <<id_>>),
+. preparing for the bus day (see <<id_share_key>>).
++
+[NOTE]
+.Be ready
+==========================================
+The bus might be late but not that late that what was encrypted with the __GnuPG__ key could be brute-forced.
+==========================================
++
+. and publishing the (public) key
+[arabic]
+ .. on key servers (see <<id_publickey_publication_keyserver>>),
+ .. during keysigning parties to have it signed (see <<id_publickey_publication_signing_party>>).
+
+To finally use the __GnuPGcard__ as much as possible, wherever it is possible:
+
+* sign others' key (see <<id_usage_sign_key>>),
+* authenticate to SSH server (see <<id_usage_authentication_ssh>>),
+* store passwords (see <<id_usage_pass>>),
+* open a LUKS crypto-container (see <<id_usage_open_luks_cryptocontainer>>),
+* sign or encrypt emails (see <<id_usage_email>>),
+* authenticate to login locally (see <<id_usage_authentication_locally>>),
+* sign Git's commit (see <<id_usage_git>>),
+* encrypt XMPP / Japper / Gajim communications (see <<id_usage_gajim>>),
+* authenticate a certificate (see <<id_usage_authenticate_certificate>>),
+* sign a __Debian__ package (see <<id_usage_deb_signature>>),
+* encrypt a file (see <<id_usage_encrypt_file>>).
+
+
+Some maintenance tasks
+
+* change or unblock PIN (see <<id_maintenance_change_pin>>),
+* extend the key validity (see <<id_maintenance_extend_key_validity>>),
+* periodic backups (see <<id_maintenance_periodic_backup>>),
+* check trust (see <<id_maintenance_trust>>),
+* refresh keys (see <<id_maintenance_refresh>>),
+* use a revocation certificate (see <<id_maintenance_revoke_key>>).
+
+
+
+
+
+[[id_preamble_ressource]]
+=== Resources
+
+
+* https://www.gnupg.org/gph/en/manual/x334.html[GnuPG trust model]
+* https://wiki.debian.org/Smartcards/OpenPGP[]
+* https://wiki.debian.org/Subkeys?action=show&redirect=subkeys[]
+* https://www.gnupg.org/howtos/card-howto/en/smartcard-howto.html[]
+* http://keyring.debian.org/creating-key.html[]
+* http://linuxfr.org/news/openpgp-card-une-application-cryptographique-pour-carte-a-puce[]
+* https://gist.github.com/anonymous/3d928a0bcbb3ed92c454[]
+* http://wiki.fsfe.org/Card_howtos/Card_with_subkeys_using_backups[]
+* https://www.gnupg.org/documentation/manuals/gnupg/index.html#Top[]
+* https://www.gnupg.org/documentation/[]
+
+A few other inspirational documents I used when I (re)discovered GnuPG
+
+* http://www.corsac.net/?rub=blog&post=1548[]
+* https://alexcabal.com/creating-the-perfect-gpg-keypair/[]
+* http://spin.atomicobject.com/2013/11/24/secure-gpg-keys-guide/[]
+* http://www.bootc.net/archives/2013/06/07/generating-a-new-gnupg-key/[]
+* http://support.gpgtools.org/discussions/problems/27774-proper-use-of-subkeys-and-opengpg-smartcards[]
+* https://www.preining.info/blog/2016/04/gnupg-subkeys-yubikey/[]
+
+GnuPG usage
+
+* http://www.dewinter.com/gnupg_howto/english/GPGMiniHowto.html[]
+
+For remote usage (see <<id_usage_remote>>)
+
+* https://blog.flameeyes.eu/2016/10/gnupg-agent-forwarding-with-openpgp-cards/[]
+* http://stackoverflow.com/questions/30058030/how-to-use-gpg-signing-key-on-a-remote-server/36804582[]
+
+==== Hardware
+
+* http://shop.kernelconcepts.de/[]
+
+
+
+
+
+
+[[id_setup]]
+== Setup __GnuPG__ environment and key
+
+
+
+
+
+[[id_setup_clean_room_environment]]
+=== Clean room environment
+
+
+Several possibilities:
+
+* run a fresh install of Debian on a dedicated machine (see <<id_preamble_prerequisite_software>>),
+* XOR run a virtual machine FIXME.
+
+
+==== USB key
+
+Once the machine is installed, mount the USB key that will be used as the __$GNUPGHOME__. That is the key that will have to be stored in a safe protected by dragons.
+
+------------------------------------------
+$ sudo mount -o users /dev/sdc1 /home/lerouge/dot/gnupg
+
+$ export GNUPGHOME="/home/lerouge/dot/gnupg"
+$ echo $GNUPGHOME
+/home/lerouge/dot/gnupg
+$
+$ chmod -R go-rwx $GNUPGHOME
+$ ls -al $GNUPGHOME
+drwx------  6 lerouge lerouge 4,0K nov.   7 15:05 ./
+drwx------ 19 lerouge lerouge 4,0K nov.   3 14:47 ../
+$
+------------------------------------------
+
+
+
+=== Software prerequisites installation
+
+
+------------------------------------------
+lerouge@lilith % sudo apt install gnupg haveged pcscd scdaemon dirmngr gnupg-curl paperkey signing-party
+FIXME
+lerouge@lilith %
+------------------------------------------
+
+NOTE: deb:__signing-party__ should probably be a suggestion only as it brings in quite a few dependencies and the same result can be reached using other (more or less manual) solutions.
+
+
+
+
+[[id_setup_reader_card]]
+=== The reader, the card and the computer
+
+
+------------------------------------------
+$ gpg --version
+gpg (GnuPG) 2.1.15
+libgcrypt 1.7.3-beta
+Copyright (C) 2016 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Home: /home/lerouge/dot/gnupg
+Supported algorithms:
+Pubkey: RSA (1), ELG (16), DSA (17), ECDH (18), ECDSA (19), EDDSA (22)
+Cipher: IDEA (S1), 3DES (S2), CAST5 (S3), BLOWFISH (S4), AES (S7),
+        AES192 (S8), AES256 (S9), TWOFISH (S10), CAMELLIA128 (S11),
+        CAMELLIA192 (S12), CAMELLIA256 (S13)
+Hash: SHA1 (H2), RIPEMD160 (H3), SHA256 (H8), SHA384 (H9), SHA512 (H10),
+      SHA224 (H11)
+Compression: Uncompressed (Z0), ZIP (Z1), ZLIB (Z2), BZIP2 (Z3)
+$
+------------------------------------------
+
+
+
+==== Preliminary tests
+
+
+Check the card information (and that everything is working) with:
+
+------------------------------------------
+$ gpg --card-status
+[…]
+$
+$ gpg --card-edit
+
+------------------------------------------
+
+See https://www.gnupg.org/howtos/card-howto/en/ch03.html#id2521343[] for output explanations.
+
+
+To get more “interesting” commands one in the gpg shell, enter
+
+------------------------------------------
+gpg/card> admin
+Admin commands are allowed
+
+gpg/card>
+------------------------------------------
+
+
+==== PIN
+
+[NOTE]
+.PIN entry
+==========================================
+Entering the (right) PIN set the card in an “unlock” state. It will stay that way as long as it is not removed.
+==========================================
+
+
+To change the PIN enter the command ++passwd++; three different PINs can be set
+
+* __PIN__,
+* __admin PIN__,
+* __reset code__.
+
+Use the command ++verify++ at the end to check out everything is OK.
+
+
+==== Personalisation
+
+To modify name, login, lang and sex enter the command after switching to “admin” mode.
+
+[TIP]
+.Ascii
+==========================================
+Only **plain** ascii characters are allowed.
+
+==========================================
+
+++<PIN_admin>++ is asked.
+
+
+==== Signature PIN
+
+Enable the __forcesig__ option; this requires the PIN to be entered each (and everytime) something must be signed.
+
+------------------------------------------
+gpg/card> admin
+Admin commands are allowed
+
+gpg/card> forcesig
+FIXME
+gpg/card>
+gpg/card> quit
+lerouge@lilith %
+------------------------------------------
+
+
+
+=== The pinpad reader case
+
+Dpending on the pinpad used, there might be necessary to use a hack to have it working (working being defined by “enter the PIN on the pinpad and not on the computer keyboard”). Pinpads that can get a variable PIN length do not need the hack.
+
+See http://wiki.gnupg.org/CardReader/GemaltoPC[] for the hack (and the explanations).
+
+
+.Synthesis
+. prepare file ++<file_gpgcard_login>++ with login information,
+. edit __GnuPGcard__ and set the __login__ information to the file ++<file_gpgcard_login>++.
+
+
+===== Prepare file ++<file_gpgcard_login>++ with login information
+
+------------------------------------------
+lerouge$
+^TP=8,8
+------------------------------------------
+
+TIP: “^T” is a control character.  With __Vim__, enter “ctrl+v” and then “ctrl+t”.
+
+
+===== Edit __GnuPGcard__ __login__ information
+
+------------------------------------------
+$ gpg --card-edit
+[…]
+gpg/card> admin
+Admin commands are allowed
+
+gpg/card> login < <file_gpgcard_login>
+[…]
+gpg/card> quit
+$
+------------------------------------------
+
+This has two drawbacks :
+
+. the user and admin PINs have the same length,
+. both are set to eight digits.
+
+And then this is working!
+
+
+
+
+
+
+
+
+
+
+
+[[id_setup_gnupg_configuration]]
+=== __GnuPG__ configuration
+
+
+See __gpg.conf__ and __gpg-agent.conf__.
+
+The configuration files are:
+
+* __gpg.conf__,
+* __gpg-agent.conf__,
+* __dirmngr.conf__ (see <<id_setup_keyserver_communication>>).
+
+Copy these configuration files into $GNUPGHOME.
+
+FIXME- see for scdaemon.conf later on -FIXME
+
+
+==== $GNUPGHOME structure
+
+In $GNUPGHOME:
+
+* __pubring.kbx__ -- file storing the keyring,
+* __trustdb.gpg__ -- file storing trust for each key,
+* __private-keys-v1.d/__ -- directory where private keys are stored (stup if they are moved to a __GnuPGcard__),
+* __keyservers_certificates__ -- directory with certificate used by key servers to ensure we are talking to legit servers (at least if the certificate stored in this directory was checked properly),
+* configuration files (see above),
+* public key,
+* public authentication subkey in SSH format,
+* information for keysigning parties.
+
+
+==== /etc/skel/
+
+FIXME
+
+Create the directory __/etc/skel/.gnupg/__ with this content but with generic configuration file (no reference to a specific key).
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[id_setup_create_key]]
+=== Create keys
+
+
+
+
+[TIP]
+.Entropy source
+==========================================
+Be prepare to wait a bit if you do not have a good entropy source (hardware or __haveged__).
+
+==========================================
+
+
+First is generated a new (primary|master) key (see <<id_setup_create_key_master>>). This key will only be able to certify (sign) other keys.
+
+Then three subkeys are generated for daily needs:
+
+* encryption key (see <<id_setup_create_subkey_encryption>>),
+* signature key (see <<id_setup_create_subkey_signature>>),
+* authentication key (see <<id_setup_create_subkey_authentication>>).
+
+
+[[id_setup_create_key_master]]
+.CLI — gpg — Generate (primary|master) key
+------------------------------------------
+
+lerouge@lilith % gpg --expert --ful-gen-key
+gpg: using character set `utf-8'
+Please select what kind of key you want:
+   (1) RSA and RSA (default)
+   (2) DSA and Elgamal
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+   (9) ECC and ECC
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+Your selection? 8
+
+Possible actions for a RSA key: Sign Certify Encrypt Authenticate 
+Current allowed actions: Sign Certify Encrypt 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? e
+
+Possible actions for a RSA key: Sign Certify Encrypt Authenticate 
+Current allowed actions: Sign Certify 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? s
+
+Possible actions for a RSA key: Sign Certify Encrypt Authenticate 
+Current allowed actions: Certify 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? q
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (2048) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0) 5y
+Key expires at jeu. 21 oct. 2021 12:06:13 EDT
+Is this correct? (y/N) y
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: John Doe
+Email address: lerouge@z.o
+Comment: 
+You are using the `utf-8' character set.
+You selected this USER-ID:
+    "John Doe <lerouge@z.o>"
+
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? o
+You need a Passphrase to protect your secret key.
+
+Please enter the passphrase
+Please re-enter this passphrase
+
+gpg: writing self signature
+gpg: RSA/SHA512 signature from: "0x5A7A8A1FD04CBBF7 [?]"
+gpg: writing public key to `/home/lerouge/dot/gnupg/pubring.kbx'
+gpg: /home/lerouge/dot/gnupg/trustdb.gpg: trustdb created
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+gpg: key 0x5A7A8A1FD04CBBF7 marked as ultimately trusted
+gpg: directory '/home/lerouge/dot/gnupg/openpgp-revocs.d' created
+gpg: writting to '/home/lerouge/dot/gnupg/openpgp-revocs.d/B74900679856683BAC79BF025A7A8A1FD04CBBF7.rev'
+gpg: RSA/SHA512 signature from: "0x5A7A8A1FD04CBBF7 John Doe <lerouge@z.o>"
+gpg: revocation certificate stored as '/home/lerouge/dot/gnupg/openpgp-revocs.d/B74900679856683BAC79BF025A7A8A1FD04CBBF7.rv'
+public and secret key created and signed.
+
+pub   4096R/0x5A7A8A1FD04CBBF7 2016-10-22 [C] expires:2021-10-21]
+      Key fingerprint = B749 0067 9856 683B AC79 BF02 5A7A 8A1F D04C BBF7
+uid                              John Doe <lerouge@z.o>
+
+lerouge@lilith %
+
+------------------------------------------
+
+
+.CLI — gpg — (master|primary) key check
+------------------------------------------
+lerouge@lilith % gpg -k
+gpg: using character set `utf-8'
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+gpg: checking the trustdb
+gpg: 1 key processes (0 validity counts cleared)
+gpg: marginals needed: 2 completes needed: 1 trust model: pgp
+gpg: depth: 0  valid:   1 signed:   0 trust: 0-, 0q, 0n, 0m, 0f, 1u
+gpg: next trustdb check due at 2021-10-21
+/home/lerouge/dot/gnupg/pubring.kbx
+ -----------------------------------
+pub  rsa4096/0x5A7A8A1FD04CBBF7  2016-10-22 [C] [expires: 2021-10-21]
+     Key fingerprint = B749 0067 9856 683B AC79 BF02 5A7A 8A1F D04C BBF7
+uid                  [ultimate] John Doe <lerouge@z.o>
+
+lerouge@lilith %
+lerouge@lilith % gpg -K
+gpg: using character set `utf-8'
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+/home/lerouge/dot/gnupg/pubring.kbx
+ --------------------------------
+sec   rsa4096/0x5A7A8A1FD04CBBF7 2016-10-21 [expires: 2021-10-21]
+      Key fingerprint = B749 0067 9856 683B AC79 BF02 5A7A 8A1F D04C BBF7
+uid                  [ultimate] John Doe <lerouge@z.o>
+
+lerouge@lilith %
+------------------------------------------
+
+
+[[id_setup_create_subkey_signature]]
+.CLI — gpg — Generate subkey — Signing
+------------------------------------------
+lerouge@lilith % gpg --expert --edit lerouge
+gpg: using character set `utf-8'
+Secret key is available.
+
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+pub  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C   
+     trust: ultimate      validity: ultimate
+[ultimate] (1). John Doe <lerouge@z.o>
+
+gpg> addkey
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (12) ECC (encrypt only)
+  (13) Existing key
+Your selection? 8
+
+Possible actions for a RSA key: Sign Encrypt Authenticate 
+Current allowed actions: Sign Encrypt 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? e
+
+Possible actions for a RSA key: Sign Encrypt Authenticate 
+Current allowed actions: Sign 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? q
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (2048) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0) 2y
+Key expires at lun. 22 oct. 2018 12:39:13 EDT
+Is this correct? (y/N) y
+Really create? (y/N) y
+Please enter the passphrase to unlock the OpenPGP secret key:
+"John Doe <lerouge@z.o>"
+4096-bit RSA key, ID 0x5A7A8A1FD04CBBF7,
+created 2016-10-22.
+
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+gpg: writing key binding signature
+gpg: RSA/SHA512 signature from: "0x5A7A8A1FD04CBBF7 John Doe <lerouge@z.o>"
+gpg: RSA/SHA512 signature from: "0x954CD4C5CF0ADFDC [?]"
+
+sec  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C   
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x954CD4C5CF0ADFDC
+     created: 2016-10-22  expires: 2018-10-22  usage: S
+[ultimate]  (1). John Doe <lerouge@z.o>
+
+gpg>
+------------------------------------------
+
+
+[[id_setup_create_subkey_encryption]]
+.CLI — gpg— Generate subkey — Encrypting
+------------------------------------------
+gpg> addkey
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (12) ECC (encrypt only)
+  (13) Existing key
+Your selection? 8
+
+Possible actions for a RSA key: Sign Encrypt Authenticate 
+Current allowed actions: Sign Encrypt 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? s
+
+Possible actions for a RSA key: Sign Encrypt Authenticate 
+Current allowed actions: Encrypt 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? q
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (2048) 3072
+Requested keysize is 3072 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0) 2y
+Key expires at sam. 22 oct. 2016 xx:xx:xx EDT
+Is this correct? (y/N) y
+Really create? (y/N) y
+
+Please enter the passphrase to unlock the OpenPGP secret key:
+"John Doe <lerouge@z.o>"
+4096-bit RSA key, ID 0x5A7A8A1FD04CBBF7,
+created 2016-10-22.
+
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+gpg: writing key binding signature
+gpg: RSA/SHA512 signature from: "0x5A7A8A1FD04CBBF7 John Doe <lerouge@z.o>"
+
+sec  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x954CD4C5CF0ADFDC
+     created: 2016-10-22  expires: 2018-10-22  usage: S
+ssb  rsa4096/0xCA5B30F08255FBB0
+     created: 2016-10-22  expires: 2018-10-22  usage: E
+[ultimate]  (1). John Doe <lerouge@z.o>
+
+gpg>
+------------------------------------------
+
+[[id_setup_create_subkey_authentication]]
+.CLI — gpg — Generate subkey — Authenticating
+------------------------------------------
+gpg> addkey
+Please select what kind of key you want:
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (5) Elgamal (encrypt only)
+   (6) RSA (encrypt only)
+   (7) DSA (set your own capabilities)
+   (8) RSA (set your own capabilities)
+  (10) ECC (sign only)
+  (11) ECC (set your own capabilities)
+  (12) ECC (encrypt only)
+  (13) Existing key
+Your selection? 8
+
+Possible actions for a RSA key: Sign Encrypt Authenticate 
+Current allowed actions: Sign Encrypt 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? a
+
+Possible actions for a RSA key: Sign Encrypt Authenticate 
+Current allowed actions: Sign Encrypt Authenticate 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? s
+
+Possible actions for a RSA key: Sign Encrypt Authenticate 
+Current allowed actions: Encrypt Authenticate 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? e
+
+Possible actions for a RSA key: Sign Encrypt Authenticate 
+Current allowed actions: Authenticate 
+
+   (S) Toggle the sign capability
+   (E) Toggle the encrypt capability
+   (A) Toggle the authenticate capability
+   (Q) Finished
+
+Your selection? q
+RSA keys may be between 1024 and 4096 bits long.
+What keysize do you want? (2048) 4096
+Requested keysize is 4096 bits
+Please specify how long the key should be valid.
+         0 = key does not expire
+      <n>  = key expires in n days
+      <n>w = key expires in n weeks
+      <n>m = key expires in n months
+      <n>y = key expires in n years
+Key is valid for? (0) 2y
+Key expires at sam. 22 oct. 2016 16:18:39 EDT
+Is this correct? (y/N) y
+Really create? (y/N) y
+
+Please enter the passphrase to unlock the OpenPGP secret key:
+"John Doe <lerouge@z.o>"
+4096-bit RSA key, ID 0x5A7A8A1FD04CBBF7,
+created 2016-10-22.
+
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+gpg: writing key binding signature
+gpg: RSA/SHA512 signature from: "0x5A7A8A1FD04CBBF7 John Doe <lerouge@z.o>"
+
+sec  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x954CD4C5CF0ADFDC
+     created: 2016-10-22  expires: 2018-10-22  usage: S
+ssb  rsa4096/0xCA5B30F08255FBB0
+     created: 2016-10-22  expires: 2018-10-22  usage: E
+ssb  rsa4096/0xAC4BB2781CA64889
+     created: 2016-10-22  expires: 2018-10-22  usage: A
+[ultimate]  (1). John Doe <lerouge@z.o>
+
+gpg>
+Save changes? (y/N) y
+lerouge@lilith %
+------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[id_backup]]
+== Backup
+
+
+
+
+[[id_backup_directory]]
+=== Directory
+
+All backups are made in __$GNUPGHOME/BACKUP-secret/__.
+
+------------------------------------------
+lerouge@lilith % cd $GNUPGHOME
+lerouge@lilith % mkdir BACKUP0-secret
+lerouge@lilith %
+------------------------------------------
+
+
+[[id_backup_key]]
+=== Keys
+
+
+.Export public key
+------------------------------------------
+lerouge@lilith % gpg --export --armor lerouge@z.o --output $GNUPGHOME/\<lerouge@z.o\>-5A7A8A1FD04CBBF7.public.key
+gpg: using character set `utf-8'
+gpg: writing to '/home/lerouge/dot/gnupg/<lerouge@z.o>-5A7A8A1FD04CBBF7.public.key
+lerouge@lilith %
+------------------------------------------
+
+Copy the public key to some other public or semi-public spaces. Once everything is checked (and validated) send it to a public key server (see <<id_publickey_publication_keyserver>>).
+
+
+[[id_backup_key_private]]
+.Export private keys
+------------------------------------------
+lerouge@lilith % gpg --export-secret-keys --armor --ouput $GNUPGHOME/BACKUP-secret/\<lerouge@z.o\>-5A7A8A1FD04CBBF7.private.key lerouge@z.o
+gpg: using character set `utf-8'
+gpg: writing to '/home/lerouge/dot/gnupg/<lerouge@z.o>-5A7A8A1FD04CBBF7.private.key
+lerouge@lilith %
+lerouge@lilith % gpg --export-secret-keys --ouput $GNUPGHOME/BACKUP-secret/\<lerouge@z.o\>-5A7A8A1FD04CBBF7.raw.private.key lerouge@z.o
+gpg: using character set `utf-8'
+gpg: writing to '/home/lerouge/dot/gnupg/<lerouge@z.o>-5A7A8A1FD04CBBF7.raw.private.key
+lerouge@lilith %
+------------------------------------------
+
+
+[[id_backup_subkey_private]]
+.Export private subkeys
+------------------------------------------
+lerouge@lilith % gpg --export-secret-subkeys --armor --ouput $GNUPGHOME/BACKUP-secret/\<lerouge@z.o\>-0x5A7A8A1FD04CBBF7.subkeys.private.key lerouge@z.o
+
+Please enter the passphrase to export the OpenPGP secret subkey:
+"John Doe <lerouge@z.o>"
+4096-bit RSA key, ID 0x5A7A8A1FD04CBBF7,
+created 2016-10-22 (main key ID 0x5A7A8A1FD04CBBF7).
+
+gpg: key BEEA…A699: asking agent for the secret parts
+gpg: key 2BDB…63BF: asking agent for the secret parts
+gpg: key 5B28…4559: asking agent for the secret parts
+lerouge@lilith %
+lerouge@lilith %
+lerouge@lilith % gpg --export-secret-subkeys --ouput $GNUPGHOME/BACKUP-secret/\<lerouge@z.o\>-0x5A7A8A1FD04CBBF7.subkeys.raw.private.key lerouge@z.o
+
+Please enter the passphrase to export the OpenPGP secret subkey:
+"John Doe <lerouge@z.o>"
+4096-bit RSA key, ID 0x5A7A8A1FD04CBBF7,
+created 2016-10-22 (main key ID 0x5A7A8A1FD04CBBF7).
+
+gpg: key BEEA…A699: asking agent for the secret parts
+gpg: key 2BDB…63BF: asking agent for the secret parts
+gpg: key 5B28…4559: asking agent for the secret parts
+lerouge@lilith %
+------------------------------------------
+
+[NOTE]
+.gpg(1) — export-secret-subkeys
+==========================================
+The  second  form of the command has the special property to render the secret part of the primary key useless; this is a GNU extension to OpenPGP and other implementations can  not  be  expected  to  successfully import such a key.  Its intended use is to generated a full key with an additional signing subkey on a dedicated machine and then using this command to export the key without the primary key to the main machine.
+
+Therefore, it's probably useless in our use case. But, well, too many backups is generally better than no backup at all…
+==========================================
+
+
+
+
+
+[[id_backup_revocation_certificate]]
+=== Revocation certificate
+
+
+[NOTE]
+.Auto-generated revocation certificates
+==========================================
+With __GnuPG__ v.2.1, revocation certificate is automatically generated in a file named after the key fingerprint in directory __$GNUPGHOME/openpgp-revocs.d/__.
+
+One will still generate another one.
+==========================================
+
+.Generate revocation certificate
+------------------------------------------
+lerouge@lilith % gpg --output $GNUPGHOME/openpgp-revocs.d/\<lerouge@z.o\>-5A7A8A1FD04CBBF7.gpg-revocation-certificate --gen-revoke lerouge@z.o
+gpg: using character set `utf-8'
+
+sec  rsa4089/0x5A7A8A1FD04CBBF7 2016-10-22 John Doe <lerouge@z.o>
+
+Create a revocation certificate for this key? (y/N) y
+Please select the reason for the revocation:
+  0 = No reason specified
+  1 = Key has been compromised
+  2 = Key is superseded
+  3 = Key is no longer used
+  Q = Cancel
+(Probably you want to select 1 here)
+Your decision? 1
+Enter an optional description; end it with an empty line:
+> 
+Reason for revocation: Key has been compromised
+(No description given)
+Is this okay? (y/N) y
+
+
+Please enter the passphrase to unlock the OpenPGP secret key:
+"John Doe <lerouge@z.o>"
+4096-bit RSA key, ID 0x5A7A8A1FD04CBBF7,
+created 2016-10-22.
+
+gpg: RSA/SHA512 signature from: "0x5A7A8A1FD04CBBF7 John Doe <lerouge@z.o>"
+Revocation certificate created.
+
+Please move it to a medium which you can hide away; if Mallory gets
+access to this certificate he can use it to make your key unusable.
+It is smart to print this certificate and store it away, just in case
+your media become unreadable.  But have some caution:  The print system of
+your machine might store the data and make it available to others!
+lerouge@lilith %
+------------------------------------------
+
+
+
+
+[[id_backup_trust]]
+=== Trust
+
+[NOTE]
+.Usefulness
+==========================================
+This step is not really usefull at that point as restoring the trust for one key is easily done by editing it (once imported) and seting its trust (__trust__ command) to __ultimate__.
+
+This is more something to do regularly (see <<id_maintenance_periodic_backup>>).
+==========================================
+
+------------------------------------------
+lerouge@lilith % gpg --export-ownertrust > $GNUPGHOME/BACKUP-trust-`date +%Y%m%d_%H%M`
+gpg: using character set 'utf-8'
+# List of assigned trustvalues, created sam. 22 oct. 2016 17:03:33 EDT
+# (Use "gpg --import-ownertrust" to restore them
+B74900679856683BAC79BF025A7A8A1FD04CBBF7:6:
+lerouge@lilith %
+------------------------------------------
+
+[NOTE]
+.Bug — option — __--output__
+==========================================
+Option __--output__ is not taken into account; it prints on std.
+==========================================
+
+
+
+
+[[id_backup_paperkey]]
+=== Paperkey
+
+
+------------------------------------------
+lerouge@lilith % paperkey --secret-key $GNUPGHOME/\<lerouge@z.o\>-5A7A8A1FD04CBBF7.raw.private.key --output=base16 --output=$GNUPGHOME/BACKUP-paperkey.b16
+lerouge@lilith %
+lerouge@lilith % paperkey --secret-key $GNUPGHOME/\<lerouge@z.o\>-5A7A8A1FD04CBBF7.raw.private.key --output=raw --output=$GNUPGHOME/BACKUP-paperkey.raw
+lerouge@lilith %
+------------------------------------------
+
+FIXME- find a clean and lean solution to print. Using CUPS in the clean room envirnment is probably part of the best option. Using a USB (basic / dumb) printer is probably the other part of the best solution -FIXME
+
+
+
+
+=== Directory protection
+
+A (small) layer of protection against the user clumsiness; we make the directory __BACKUP-secret/__ read-only for the user. Hopefully, it will limit the probabilities of a wrong ++rm -rf++.
+
+
+------------------------------------------
+lerouge@lilith % cd $GNUPGHOME
+lerouge@lilith % chmod -R u=r BACKUP-secret
+lerouge@lilith %
+------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[id_setup2_gnupgcard]]
+== Setup keys onto respective __GnuPGcard__s
+
+
+
+
+[[id_setup2_gnupgcard_move_subkey_to_daily_gnupgcard]]
+=== Move subkeys to the (daily) __GnuPGcard__s
+
+
+Here we copy all three subkeys (for encryption, signature and authentication) to our daily __GnuPGcard__.
+
+This is done twice, once for each of the daily __GnuPGcard__s. This is done first for card __3D7C__ and then redone for __3D7B__.
+
+------------------------------------------
+lerouge@lilith % gpg --edit-key lerouge
+gpg: using character set `utf-8'
+Secret key is available.
+
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+sec  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x954CD4C5CF0ADFDC
+     created: 2016-10-22  expires: 2018-10-22  usage: S
+ssb  rsa4096/0xCA5B30F08255FBB0
+     created: 2016-10-22  expires: 2018-10-22  usage: E
+ssb  rsa4096/0xAC4BB2781CA64889
+     created: 2016-10-22  expires: 2018-10-22  usage: A
+[ultimate] (1). John Doe <lerouge@z.o>
+
+gpg> key 1
+
+sec  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C
+     trust: ultimate      validity: ultimate
+ssb* rsa4096/0x954CD4C5CF0ADFDC
+     created: 2016-10-22  expires: 2018-10-22  usage: S
+ssb  rsa4096/0xCA5B30F08255FBB0
+     created: 2016-10-22  expires: 2018-10-22  usage: E
+ssb  rsa4096/0xAC4BB2781CA64889
+     created: 2016-10-22  expires: 2018-10-22  usage: A
+[ultimate] (1). John Doe <lerouge@z.o>
+
+gpg> keytocard
+Please select where to store the key:
+   (1) Signature key
+   (3) Authentication key
+Your selection? 1
+
+Please enter the passphrase to unlock the OpenPGP secret key:
+"John Doe <lerouge@z.o>"
+4096-bit RSA key, ID 0x5A7A8A1FD04CBBF7,
+created 2016-10-22.
+
+Please enter the Admin PIN
+Use the reader's pinpad for input
+
+Please enter the PIN
+Use the reader's pinpad for input
+
+sec  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C
+     trust: ultimate      validity: ultimate
+ssb* rsa4096/0x954CD4C5CF0ADFDC
+     created: 2016-10-22  expires: 2018-10-22  usage: S
+ssb  rsa4096/0xCA5B30F08255FBB0
+     created: 2016-10-22  expires: 2018-10-22  usage: E
+ssb  rsa4096/0xAC4BB2781CA64889
+     created: 2016-10-22  expires: 2018-10-22  usage: A
+[ultimate] (1). John Doe <lerouge@z.o>
+
+gpg> save
+lerouge@lilith %
+lerouge@lilith % gpg --edit-key lerouge
+
+gpg> list
+
+sec  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x954CD4C5CF0ADFDC
+     created: 2016-10-22  expires: 2018-10-22  usage: S
+     card-no: 0005 00003D7C
+ssb  rsa4096/0xCA5B30F08255FBB0
+     created: 2016-10-22  expires: 2018-10-22  usage: E
+ssb  rsa4096/0xAC4BB2781CA64889
+     created: 2016-10-22  expires: 2018-10-22  usage: A
+[ultimate] (1). John Doe <lerouge@z.o>
+ […]
+------------------------------------------
+
+[IMPORTANT]
+.Copy xor move with save
+==========================================
+As long as the ++save++ command is not entered, the subkey is only copied to the card.
+
+Once the ++save++ command is entered, then the subkey is displayed as being on the card.
+
+==========================================
+
+------------------------------------------
+ […]
+gpg> key 2
+
+sec  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x954CD4C5CF0ADFDC
+     created: 2016-10-22  expires: 2018-10-22  usage: S
+     card-no: 0005 00003D7C
+ssb* rsa4096/0xCA5B30F08255FBB0
+     created: 2016-10-22  expires: 2018-10-22  usage: E
+ssb  rsa4096/0xAC4BB2781CA64889
+     created: 2016-10-22  expires: 2018-10-22  usage: A
+[ultimate] (1). John Doe <lerouge@z.o>
+
+gpg> keytocard
+Please select where to store the key:
+   (2) Encryption key
+Your selection? 2
+
+Please enter the passphrase to unlock the OpenPGP secret key:
+"John Doe <lerouge@z.o>"
+4096-bit RSA key, ID 0x5A7A8A1FD04CBBF7,
+created 2016-10-22.
+
+Please enter the Admin PIN
+Use the reader's pinpad for input
+
+Please enter the Admin PIN
+Use the reader's pinpad for input
+
+sec  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x954CD4C5CF0ADFDC
+     created: 2016-10-22  expires: 2018-10-22  usage: S
+     card-no: 0005 00003D7C
+ssb* rsa3072/0xCA5B30F08255FBB0
+     created: 2016-10-22  expires: 2018-10-22  usage: E
+ssb  rsa4096/0xAC4BB2781CA64889
+     created: 2016-10-22  expires: 2018-10-22  usage: A
+[ultimate] (1). John Doe <lerouge@z.o>
+
+gpg> save
+lerouge@lilith %
+lerouge@lilith % gpg --edit-key lerouge
+gpg: using character set 'utf-8'
+Secret key is available.
+
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+sec  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x954CD4C5CF0ADFDC
+     created: 2016-10-22  expires: 2018-10-22  usage: S
+     card-no: 0005 00003D7C
+ssb  rsa3072/0xCA5B30F08255FBB0
+     created: 2016-10-22  expires: 2018-10-22  usage: E
+ssb  rsa4096/0xAC4BB2781CA64889
+     created: 2016-10-22  expires: 2018-10-22  usage: A
+[ultimate] (1). John Doe <lerouge@z.o>
+
+gpg> key 3
+
+sec  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x954CD4C5CF0ADFDC
+     created: 2016-10-22  expires: 2018-10-22  usage: S
+     card-no: 0005 00003D7C
+ssb  rsa3072/0xCA5B30F08255FBB0
+     created: 2016-10-22  expires: 2018-10-22  usage: E
+ssb* rsa4096/0xAC4BB2781CA64889
+     created: 2016-10-22  expires: 2018-10-22  usage: A
+[ultimate] (1). John Doe <lerouge@z.o>
+
+gpg> keytocard
+
+Please select where to store the key:
+   (3) Authentication key
+Your selection? 3
+
+Please enter the passphrase to unlock the OpenPGP secret key:
+"John Doe <lerouge@z.o>"
+4096-bit RSA key, ID 0x5A7A8A1FD04CBBF7,
+created 2016-10-22.
+
+Please enter the Admin PIN
+Use the reader's pinpad for input
+
+sec  rsa4096/0x5A7A8A1FD04CBBF7
+     created: 2016-10-22  expires: 2021-10-21  usage: C
+     trust: ultimate      validity: ultimate
+ssb  rsa4096/0x954CD4C5CF0ADFDC
+     created: 2016-10-22  expires: 2018-10-22  usage: S
+     card-no: 0005 00003D7C
+ssb  rsa3072/0xCA5B30F08255FBB0
+     created: 2016-10-22  expires: 2018-10-22  usage: E
+ssb* rsa4096/0xAC4BB2781CA64889
+     created: 2016-10-22  expires: 2018-10-22  usage: A
+[ultimate] (1). John Doe <lerouge@z.o>
+
+gpg> save
+lerouge@lilith %
+------------------------------------------
+
+
+.CLI — gpg — List private keys
+------------------------------------------
+lerouge@lilith % gpg -K
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+sec#  rsa4096/0x5A7A8A1FD04CBBF7 2016-10-22 [C] [expires: 2021-10-21]
+      Key fingerprint = B749 0067 9856 683B AC79  BF02 5A7A 8A1F D04C BBF7
+uid                   [ultimate] John Doe <lerouge@z.o>
+ssb>  rsa4096/0x954CD4C5CF0ADFDC 2016-10-22 [S] [expires: 2018-10-22]
+      Key fingerprint = BBED 735D 6230 738F 3D68  9B9B 954C D4C5 CF0A DFDC
+      Card serial no. = 0005 00003D7C
+ssb>  rsa3072/0xCA5B30F08255FBB0 2016-10-22 [E] [expires: 2018-10-22]
+      Key fingerprint = DE9B 8CBF 3AEB 1B51 799C  B2FD CA5B 30F0 8255 FBB0
+      Card serial no. = 0005 00003D7C
+ssb>  rsa4096/0xAC4BB2781CA64889 2016-10-22 [A] [expires: 2018-10-22]
+      Key fingerprint = CD9F 0FF7 9F05 BA88 6ECE  3EFD AC4B B278 1CA6 4889
+      Card serial no. = 0005 00003D7C
+
+lerouge@lilith %
+------------------------------------------
+
+
+
+
+[[id_setup2_gnupgcard_import_masterprimary_private_original]]
+=== Restore key with subkeys not on the __GnuPGcard__
+
+
+We want to put our subkeys on another daily __GnuPGcard__ for daily usage at home (and as a readily backup). For that we need to retore our key with its subkeys not flagged as moved to the (first) __GnuPGcard__.
+
+. delete everything out of $GNUPGHOME except for the configuration files
+. remove the private keys
++
+------------------------------------------
+rm -rf private-keys-v1.d/
+------------------------------------------
++
+. re-create a key ring
++
+------------------------------------------
+gpg -k
+ ** pubring.kbx and trusteddb.gpg are created
+------------------------------------------
++
+. import the key
++
+------------------------------------------
+lerouge@litlith gpg --import BACKUP-secret/\<lerouge@z.o\>-5A7A8A1FD04CBBF7.private.key
+ […]
+
+Do you want to import (y/N)? y
+
+Please enter the passphrase to import the OpenPGP secret key:
+"John Doe <lerouge@z.o>"
+4096-bit RSA key, ID 0x5A7A8A1FD04CBBF7,
+created 2016-10-22.
+
+gpg: key 0x5A7A8A1FD04CBBF7/0x5A7A8A1FD04CBBF7: secret key imported
+gpg: key 0x5A7A8A1FD04CBBF7/: secret key imported
+gpg: key 0x5A7A8A1FD04CBBF7/: secret key imported
+gpg: key 0x5A7A8A1FD04CBBF7/: secret key imported
+gpg: key 0x5A7A8A1FD04CBBF7 secret key imported
+gpg: Total number processed: 1
+gpg:               imported: 1
+gpg:       secret keys read: 1
+gpg:   secret keys imported: 1
+lerouge@lilith %
+------------------------------------------
++
+. import its trust level (this could be setup manually)
++
+------------------------------------------
+lerouge@lilith % gpg --import-ownertrust BACKUP-secret/BACKUP-trust-20161022
+gpg: using character set 'utf-8'
+gpg: inserting ownertrust of 6
+lerouge@lilith %
+------------------------------------------
++
+. check the key
++
+------------------------------------------
+lerouge@lilith % gpg -k
+FIXME- ok
+lerouge@lilith % gpg -K
+FIXME- ok nothing on smartcard
+lerouge@lilith % gpg -k
+------------------------------------------
+
+
+
+
+[[id_setup2_gnupgcard_move_subkey_to_daily_gnupgcard_bis]]
+=== Move subkeys onto the second (daily) __GnuPGcard__
+
+This is the sconed daily __GnuPGcard__. This one stays at home and is used in the pinpad reader. This is a readily backup.
+
+See <<id_setup2_gnupgcard_move_subkey_to_daily_gnupgcard>>.
+
+.CLI — gpg — List private keys
+------------------------------------------
+lerouge@lilith % gpg -K
+gpg: using character set 'utf-8'
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+/home/lerouge/dot/gnupg/pubring.kbx
+ -----------------------------------
+sec#  rsa4096/0x5A7A8A1FD04CBBF7 2016-10-22 [C] [expires: 2021-10-21]
+      Key fingerprint = B749 0067 9856 683B AC79  BF02 5A7A 8A1F D04C BBF7
+uid                   [ultimate] John Doe <lerouge@z.o>
+ssb>  rsa4096/0x954CD4C5CF0ADFDC 2016-10-22 [S] [expires: 2018-10-22]
+      Key fingerprint = BBED 735D 6230 738F 3D68  9B9B 954C D4C5 CF0A DFDC
+      Card serial no. = 0005 00003D7B
+ssb>  rsa3072/0xCA5B30F08255FBB0 2016-10-22 [E] [expires: 2018-10-22]
+      Key fingerprint = DE9B 8CBF 3AEB 1B51 799C  B2FD CA5B 30F0 8255 FBB0
+      Card serial no. = 0005 00003D7B
+ssb>  rsa4096/0xAC4BB2781CA64889 2016-10-22 [A] [expires: 2018-10-22]
+      Key fingerprint = CD9F 0FF7 9F05 BA88 6ECE  3EFD AC4B B278 1CA6 4889
+      Card serial no. = 0005 00003D7B
+
+lerouge@lilith %
+------------------------------------------
+
+
+
+
+
+
+
+
+[[id_setup2_gnupgcard_move_masterprimary_to_gnupgcard]]
+=== Move (primary|master) key to (certification) __GnuPGcard__
+
+
+
+
+FIXME- Reset $GNUPGHOME (delete everything and --import). -FIXME
+
+
+------------------------------------------
+lerouge@lilith % gpg --edit-key lerouge
+gpg: using character set `utf-8'
+Secret key is available.
+
+FIXME
+
+gpg> keytocard
+Really move the primary key? (y/N) y
+Please select where to store the key:
+   (1) Signature key
+Your selection? 1
+
+Please enter the passphrase to activate the secret key for this session:
+"John Doe <lerouge@z.o>"
+4096-bit RSA key, ID 0x5A7A8A1FD04CBBF7,
+created 2016-10-22.
+
+Please enter the Admin PIN
+Use the reader's pinpad for input.
+
+Please enter the Admin PIN
+Use the reader's pinpad for input.
+
+gpg> save
+lerouge@lilith % 
+------------------------------------------
+
+------------------------------------------
+lerouge@lilith % gpg -k
+gpg: using character set `utf-8'
+gpg: key 0x73F552FC29CB8DCD: accepted as trusted key
+/home/lerouge/.gnupg/pubring.gpg
+ --------------------------------
+pub   FIXME
+      Key fingerprint = B749 0067 9856 683B AC79 BF02 5A7A 8A1F D04C BBF7 
+uid                 [ultimate] John Doe <lerouge@z.o>
+FIXME
+
+lerouge@lilith %
+lerouge@lilith % gpg -K
+gpg: using character set `utf-8'
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+/home/lerouge/fot/gnupg/pubring.kbx
+ ----------------------------------
+sec>  
+      Key fingerprint = B749 0067 9856 683B AC79 BF02 5A7A 8A1F D04C BBF7 
+      Card serial no. = 0005 00003D7A
+uid                   [ultimate] John Doe <lerouge@z.o>
+ssb>  FIXME
+      Key fingerprint = FIXME
+ssb>  FIXME
+      Key fingerprint = FIXME
+ssb>  FIXME
+      Key fingerprint = FIXME
+
+lerouge@lilith %
+------------------------------------------
+
+NOTE: The (master|primary) key is now also on the card (see the __Card serial no. = 0005 00003D7A__).
+
+
+
+
+
+
+
+
+[[id_setup2_gnupgcard_remove_masterprimary_private_key]]
+=== Remove the (master|primary) private key
+
+
+
+
+The key (master|primary) private key is removed from the keyring in $GNUPGHOME. It will still be available from the (certification) __GnuPGcard__.
+
+
+
+[NOTE]
+.__GnuPGcard__ with empty $GNUPGHOME
+==========================================
+When inserting a __GnuPGcard__, if $GNUPGHOME is empty (no __pubring.kbx__ and no __private-keys-v1.d/__) then __private-keys-v1.d/__ is populated with keys from the __GnuPGcard__.
+==========================================
+
+
+------------------------------------------
+lerouge@lilith % gpg2 --delete-secret-keys lerouge@z.o
+gpg: using character set `utf-8'
+
+sec  rsa4096/0x5A7A8A1FD04CBBF7 2016-10-22 John Doe <lerouge@z.o>
+
+Delete this key from the keyring? (y/N) y
+This is a secret key! - really delete? (y/N) y
+
+Do you really want to permanently delete the OpenPGP secret key:
+"John Doe <lerouge@z.o>"
+4096-bit RSA, ID 0x5A7A8A1FD04CBBF7,
+created 2016-10-22.
+?
+ <Delete key>
+
+lerouge@lilith % gpg -k
+gpg: using character set `utf-8'
+gpg: key 0x73F552FC29CB8DCD: accepted as trusted key
+/home/lerouge/.gnupg/pubring.gpg
+ --------------------------------
+pub   4096R/0x73F552FC29CB8DCD 2014-10-23 [expires: 2021-10-21]
+      Key fingerprint = 4F2C 7E61 4997 080D F2D0  623C 73F5 52FC 29CB 8DCD
+uid                 [ultimate] John Doe <lerouge@z.o>
+sub   4096R/0x8B6ED16C5AF56174 2014-10-23 [expires: 2016-10-22]
+      Key fingerprint = AEAE 00B8 D31F BA4B 793A  8633 8B6E D16C 5AF5 6174
+sub   3072R/0xEEF812A60F920487 2014-10-23 [expires: 2016-10-22]
+      Key fingerprint = B05A 8C07 C4AD 2323 124E  CE81 EEF8 12A6 0F92 0487
+sub   4096R/0x91CB763960A9FCB6 2014-10-23 [expires: 2016-10-22]
+      Key fingerprint = 59F9 AA5A 0BA6 0A01 A528  061C 91CB 7639 60A9 FCB6
+
+lerouge@lilith %
+lerouge@lilith % gpg2 -K
+gpg: using character set `utf-8'
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+lerouge@lilith %
+------------------------------------------
+
+
+[TIP]
+.BUG — gpg(1) — Typo
+==========================================
+Typo on --delete-secret-keys command
+
+s/gRemove/Remove/
+==========================================
+
+
+
+
+
+
+
+
+[[id_setup2_gnupgcard_import_subkey]]
+=== Re-import subkeys
+
+
+
+
+One re-imports just and **only** the subkeys we exported (**not** the primary|master secret key from earlier ; see <<id_backup_subkey_private>>).
+
+------------------------------------------
+lerouge@lilith % gpg --import BACKUP-secret/\<lerouge@z.o\>-5A7A8A1FD04CBBF7-subkeys.private.key
+gpg: using character set `utf-8'
+gpg: armor: BEGIN PGP PRIVATE KEY BLOCK
+:secret key packet:
+ [SNIP]
+
+
+y
+
+Please entrer the passphrase to import the OpenPGP secret key:
+"John Doe <lerouge@z.o>"
+4096-bit RSA key, ID 0x954CD4C5CF0ADFDC,
+created 2016-10-22 (main key ID 0x5A7A8A1FD04CBBF7).
+ <OK>
+
+gpg: key 0x5A7A8A1FD04CBBF7/ DFDC: secret key imported
+gpg: key 0x5A7A8A1FD04CBBF7/ FBB0: secret key imported
+gpg: key 0x5A7A8A1FD04CBBF7/ 4889: secret key imported
+gpg: To migrate 'secring.gpg', with each smartcard, run: gpg --card-status
+gpg: key 0x5A7A8A1FD04CBBF7: secret key importef
+gpg: Total number processed: 1
+gpg:              unchanged: 1
+gpg:       secret keys read: 1
+gpg:   secret keys imported: 1
+lerouge@lilith %
+------------------------------------------
+
+
+
+
+
+
+
+
+[[id_final_check]]
+== Final check
+
+
+
+[IMPORTANT]
+.gpg -K — # & > meaning
+==========================================
+++#++ means the master|primary|certification key is not in the keypair located in the keyring.
+
+++>++ means those private subkeys are available on the smart card.
+==========================================
+
+
+[[id_final_check_gnupgcard_daily]]
+=== For the daily __GnuPGcard__
+
+------------------------------------------
+lerouge@lilith % gpg -k
+gpg: using character set 'utf-8'
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+/home/lerouge/.gnupg/pubring.kbx
+ --------------------------------
+pub   rsa4096/0x5A7A8A1FD04CBBF7 2016-10-22 [C] [expires: 2021-10-21]
+      Key fingerprint = B749 0067 9856 683B AC79  BF02 5A7A 8A1F D04C BBF7
+uid                   [ultimate] John Doe <lerouge@z.o>
+sub   rsa4096/0x954CD4C5CF0ADFDC 2016-10-22 [S] [expires: 2018-10-22]
+      Key fingerprint = BBED 735D 6230 738F 3D68  9B9B 954C D4C5 CF0A DFDC
+sub   rsa3072/0xCA5B30F08255FBB0 2016-10-22 [E] [expires: 2018-10-22]
+      Key fingerprint = DE9B 8CBF 3AEB 1B51 799C  B2FD CA5B 30F0 8255 FBB0
+sub   rsa4096/0xAC4BB2781CA64889 2016-10-22 [A] [expires: 2018-10-22]
+      Key fingerprint = CD9F 0FF7 9F05 BA88 6ECE  3EFD AC4B B278 1CA6 4889
+
+lerouge@lilith %
+lerouge@lilith % gpg -K
+gpg: using character set 'utf-8'
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+gpg: no running gpg-agent - starting '/usr/bin/gpg-agent'
+gpg: waiting for the agent to come up ... (5s)
+gpg: connection to agent established
+/home/lerouge/.gnupg/pubring.kbx
+ --------------------------------
+sec#  rsa4096/0x5A7A8A1FD04CBBF7 2016-10-22 [C] [expires: 2021-10-21]
+      Key fingerprint = B749 0067 9856 683B AC79  BF02 5A7A 8A1F D04C BBF7
+uid                   [ultimate] John Doe <lerouge@z.o>
+ssb>  rsa4096/0x954CD4C5CF0ADFDC 2016-10-22 [S] [expires: 2018-10-22]
+      Key fingerprint = BBED 735D 6230 738F 3D68  9B9B 954C D4C5 CF0A DFDC
+      Card serial no. = 0005 00003D7B
+ssb>  rsa3072/0xCA5B30F08255FBB0 2016-10-22 [E] [expires: 2018-10-22]
+      Key fingerprint = DE9B 8CBF 3AEB 1B51 799C  B2FD CA5B 30F0 8255 FBB0
+      Card serial no. = 0005 00003D7B
+ssb>  rsa4096/0xAC4BB2781CA64889 2016-10-22 [A] [expires: 2018-10-22]
+      Key fingerprint = CD9F 0FF7 9F05 BA88 6ECE  3EFD AC4B B278 1CA6 4889
+      Card serial no. = 0005 00003D7B
+
+lerouge@lilith %
+------------------------------------------
+
+
+
+
+[[id_final_check_gnupgcard_cert]]
+=== For the certification __GnuPGcard__
+
+
+------------------------------------------
+lerouge@lilith % gpg -k
+ing character set 'utf-8'
+/home/lerouge/dot/gnupg-cert/pubring.kbx
+ ----------------------------------------
+pub   rsa4096/0x5A7A8A1FD04CBBF7 2016-10-22 [C] [expires: 2021-10-21]
+      Key fingerprint = B749 0067 9856 683B AC79  BF02 5A7A 8A1F D04C BBF7
+uid                   [ unknown] John Doe <lerouge@z.o>
+sub   rsa4096/0x954CD4C5CF0ADFDC 2016-10-22 [S] [expires: 2018-10-22]
+      Key fingerprint = BBED 735D 6230 738F 3D68  9B9B 954C D4C5 CF0A DFDC
+sub   rsa3072/0xCA5B30F08255FBB0 2016-10-22 [E] [expires: 2018-10-22]
+      Key fingerprint = DE9B 8CBF 3AEB 1B51 799C  B2FD CA5B 30F0 8255 FBB0
+sub   rsa4096/0xAC4BB2781CA64889 2016-10-22 [A] [expires: 2018-10-22]
+      Key fingerprint = CD9F 0FF7 9F05 BA88 6ECE  3EFD AC4B B278 1CA6 4889
+
+lerouge@lilith %
+lerouge@lilith % gpg -K
+gpg: using character set 'utf-8'
+/home/lerouge/dot/gnupg-cert/pubring.kbx
+ ----------------------------------------
+sec>  rsa4096/0x5A7A8A1FD04CBBF7 2016-10-22 [C] [expires: 2021-10-21]
+      Key fingerprint = B749 0067 9856 683B AC79  BF02 5A7A 8A1F D04C BBF7
+      Card serial no. = 0005 00003D7A
+uid                   [ unknown] John Doe <lerouge@z.o>
+ssb   rsa4096/0x954CD4C5CF0ADFDC 2016-10-22 [S] [expires: 2018-10-22]
+      Key fingerprint = BBED 735D 6230 738F 3D68  9B9B 954C D4C5 CF0A DFDC
+ssb   rsa3072/0xCA5B30F08255FBB0 2016-10-22 [E] [expires: 2018-10-22]
+      Key fingerprint = DE9B 8CBF 3AEB 1B51 799C  B2FD CA5B 30F0 8255 FBB0
+ssb   rsa4096/0xAC4BB2781CA64889 2016-10-22 [A] [expires: 2018-10-22]
+      Key fingerprint = CD9F 0FF7 9F05 BA88 6ECE  3EFD AC4B B278 1CA6 4889
+
+lerouge@lilith %
+lerouge@lilith % gpg --card-status
+gpg: using character set 'utf-8'
+
+Reader ...........: 08E6:3478:X:0
+Application ID ...: D276000124010201000500003D7A0000
+Version ..........: 2.1
+Manufacturer .....: ZeitControl
+Serial number ....: 00003D7A
+Name of cardholder: John Doe
+Language prefs ...: en
+Sex ..............: unspecified
+URL of public key : [not set]
+Login data .......: lerouge\n\x14P=8,8\n
+Signature PIN ....: forced
+Key attributes ...: rsa4096 rsa2048 rsa2048
+Max. PIN lengths .: 32 32 32
+PIN retry counter : 3 3 3
+Signature counter : 0
+Signature key ....: B749 0067 9856 683B AC79  BF02 5A7A 8A1F D04C BBF7
+      created ....: 2016-10-22 16:06:38
+Encryption key....: [none]
+Authentication key: [none]
+General key info..: pub  rsa4096/0x5A7A8A1FD04CBBF7 2016-10-22 John Doe <lerouge@z.o>
+sec>  rsa4096/0x5A7A8A1FD04CBBF7  created: 2016-10-22  expires: 2021-10-21
+                                  card-no: 0005 00003D7A
+ssb#  rsa4096/0x954CD4C5CF0ADFDC  created: 2016-10-22  expires: 2018-10-22
+ssb#  rsa3072/0xCA5B30F08255FBB0  created: 2016-10-22  expires: 2018-10-22
+ssb#  rsa4096/0xAC4BB2781CA64889  created: 2016-10-22  expires: 2018-10-22
+lerouge@lilith %
+------------------------------------------
+
+
+
+
+=== Using hopenpgp-tools
+
+
+[WARNING]
+.Requirement — deb:__hopenpgp-tools__
+==========================================
+This part requires deb:__hopenpgp-tools__.
+
+==========================================
+
+
+FIXME- requires __pubring.gpg__, i.e. GnuPG pre-2.1 (if not 1.x) -FIXME
+
+
+------------------------------------------
+lerouge@lilith % hkt export-pubkeys 5A7A8A1FD04CBBF7 | hokey lint
+hkt (hopenpgp-tools) 0.19.4
+Copyright (C) 2012-2016  Clint Adams
+hkt comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions.
+hkt: /home/lerouge/.gnupg/pubring.gpg: openBinaryFile: does not exist (No such file or directory)
+hokey (hopenpgp-tools) 0.19.4
+Copyright (C) 2012-2016  Clint Adams
+hokey comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions.
+hokey: Unexpected finalization failure
+lerouge@lilith %
+------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+[[id_share_key]]
+== Share the master|primary key
+
+
+
+The goal here is to share the (secret) master|primary key and its passphrase among a set number of trusted people. Those people are entrusted to have acces to any encrypted (with the aforementionned key and passphrase) material after the bus came.
+
+
+
+=== Before the bus
+
+. choose with who to share the secrets
+. in the list of people, choose how many are required to reveal the secrets
+
+// echo $(xxd -p 2F33F93A64A4C7DECDE1D6D25C78936078E77F72.key) | sed 's/ //g'
+
+
+==== The master|primary key and its subkeys
+
+[IMPORTANT]
+.Key length
+==========================================
+As the keys are more than 1 024 bits long one cannot use __ssss__ directly (__ssss__ cannot work on more than 1 024 bits). One will put the master|primary key and its subkeys in an archive and then encrypt this archive with a (long) password. It is that password that will be shared thanks to __ssss__.
+==========================================
+
+. encrypt the master|primary key and its subkeys with a symetric cypher with a (strong) password (that will be shared) using __GnuPG__
++
+------------------------------------------
+lerouge@lilith % cd $GNUPGHOME/private-keys-v1.d/
+lerouge@lilith %
+lerouge@lilith % tar cvJf John.tar.xz --label=John-post-bus *.key
+John-post-bus
+<lerouge@z.o>-FIXME
+<lerouge@z.o>-FIXME
+lerouge@lilith %
+lerouge@lilith % tar --test-label -f John.tar.xz
+John-post-bus
+lerouge@lilith %
+lerouge@lilith % gpg --symmetric --cipher-algo CAMELLIA256 John.tar.xz
+<password_to_be_shared>
+gpg: using character set 'utf-8'
+gpg: using cipher CAMELLIA256
+gpg: writing to 'John.tar.xz.gpg'
+lerouge@lilith %
+------------------------------------------
++
+. convert the password to hexadecimal encoding
++
+NOTE: This step allows sharing a password with “special” characters using __ssss__.
++
+------------------------------------------
+lerouge@lilith % echo -n '<password_to_be_shared>' | xxd -plain
+<password_to_be_shared_in_hexadecimal>
+lerouge@lilith %
+------------------------------------------
++
+WARNING: Output is on several lines; it must be on one line to be fed to __ssss-split__ at the next step. That is exactly why the one liner below is adding __awk 'BEGIN { OFS=""; ORS="" }; { print $1 }'__ (reminder: in clean room environment, the system is the bare minimum so there is no X to copy/paste with a mouse).
++
+. split the password
++
+------------------------------------------
+lerouge@lilith % ssss-split -t 10 -n 14 -w John_01 -x > John_01-split
+Generating shares using a (10,14) scheme with dynamic security level.
+Enter the secret, as most 256 hex digits: <password_to_be_shared_in_hexadecimal>
+lerouge@lilith %
+------------------------------------------
++
+. those two previous steps being done in one (unless you want to retype and make errors that will be fatal after the bus came)
++
+------------------------------------------
+lerouge@lilith % echo -n '<password_to_be_shared>' | xxd -plain | awk 'BEGIN { OFS=""; ORS="" }; { print $1 }' | ssss-split -t 10 -n 14 -w John_01 -x > John_01-split
+------------------------------------------
++
+. distribute each share of the secret into its own file (allowing to manipulate them seperatly once outside of the clean room environment)
++
+------------------------------------------
+lerouge@lilith % awk 'BEGIN { FS = "-" ; OFS = "-" ; ORS = "\n" } ; { if (NR!=1) { printf "%s-%s-%s\n", $1,$2,$3>$1"-"$2".shared_secret"; close($1"-"$2".shared_secret") } }' John_01-split
+lerouge@lilith %
+lerouge@lilith % ls -al John_01*
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-01.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-02.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-03.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-04.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-05.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-06.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-07.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-08.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-09.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-10.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-11.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-12.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-13.shared_secret
+-rw-r----- 1 lerouge lerouge   205 nov.  15 15:14 John_01-14.shared_secret
+lerouge@lilith %
+------------------------------------------
++
+. convert the text file into a postcript file
++
+[NOTE]
+.Printing & postscript
+==========================================
+Having the file in Postcript format allows to plug the USB device into a printer and print the files (without having them going through a real computer). This does not work with text files (in general).
+==========================================
++
+[NOTE]
+.Picture
+==========================================
+Another way could be to take a picture with a phone and then print it. Thanks for the idea Mordread!
+==========================================
++
+[NOTE]
+.__enscript__ and non-ascii characters
+==========================================
+__enscript__ does not support UTF-8. Therefore, if one uses a non-ASCII caharacter in the text token (__-w__) of __ssss-plit__, __enscript__ will output a warning. Using the option __--missing-characters__ helps figuring out what character is “wrong”.
+==========================================
++
+------------------------------------------
+lerouge@lilith % cd BACKUP-secret_share
+lerouge@lilith % for file in *.shared_secret; do enscript $file --missing-characters --output-file=$file.ps
+
+lerouge@lilith %
+------------------------------------------
++
+. set better mode on all those files
++
+------------------------------------------
+lerouge@lilith % cd BACKUP-secret_share
+lerouge@lilith % chmod u-w, go-rwx .
+lerouge@lilith % chmod u-w, go-rwx *
+lerouge@lilith %
+------------------------------------------
++
+. for each postcript file
+[arabic]
+ .. copy it onto a unique USB device,
++
+[IMPORTANT]
+.Unique vs. quorum
+==========================================
+One USB device is not absolutely required for each piece of the secret. But at the very least, one must use as many USB devices as ⌈<number_of_trusted_people> ÷ <quorum>⌉.
+
+The idea is that **no** electronic device (whatever its type; USB device, printer, PC, etc.) “sees”, one way or another, as many secrets as the required quorum (besides the clean room environment, of course).
+==========================================
++
+ .. go to a unique place to print it,
+ .. check the printed version is the same as the one in the file in the clean room environment (once the bus came, it is too late…).
+
+
+==== The passphrase
+
+. convert the passphrase to hexadecimal encoding
++
+NOTE: This step allows sharing a passphrase with “special” characters using __ssss__.
++
+------------------------------------------
+lerouge@lilith % echo -n '<passphrase_to_be_shared>' | xxd -plain
+<passphrase_to_be_shared_in_hexadecimal>
+lerouge@lilith %
+------------------------------------------
++
+. split the passphrase
++
+------------------------------------------
+lerouge@lilith % ssss-split -t 10 -n 14 -w John_02 -x > John_02-split
+Generating shares using a (10,14) scheme with dynamic security level.
+Enter the secret, as most 256 hex digits: <passphrase_to_be_shared_in_hexadecimal>
+lerouge@lilith %
+------------------------------------------
++
+. those two previous steps being done in one (unless you want to retype and make typos that will be fatal after the bus came)
++
+------------------------------------------
+lerouge@lilith % echo -n '<passphrase_to_be_shared>' | xxd -plain | awk 'BEGIN { OFS=""; ORS="" }; { print $1 }' | ssss-split -t 10 -n 14 -w John_02 -x > John_02-split
+------------------------------------------
++
+. distribute each share of the secret into its own file (allowing to manipulate them separatly once outside of the clean room environment)
++
+------------------------------------------
+lerouge@lilith % awk 'BEGIN { FS = "-" ; OFS = "-" ; ORS = "\n" } ; { if (NR!=1) { printf "%s-%s-%s\n", $1,$2,$3>$1"-"$2".shared_secret"; close($1"-"$2".shared_secret") } }' John_02-split
+lerouge@lilith %
+lerouge@lilith % ls -al John_02*
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-01.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-02.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-03.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-04.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-05.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-06.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-07.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-08.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-09.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-10.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-11.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-12.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-13.shared_secret
+-rw-r----- 1 lerouge lerouge   247 nov.  15 15:14 John_02-14.shared_secret
+lerouge@lilith %
+------------------------------------------
++
+. convert the text file into a postcript file
++
+[NOTE]
+.Printing & postscript
+==========================================
+Having the file in Postcript format allows to plug the USB device into a printer and print the files (without having them going through a real computer). This does not work with text files (in general).
+==========================================
++
+[NOTE]
+.Picture
+==========================================
+Another way could be to take a picture with a phone and then print it. Thanks for the idea Mordread!
+==========================================
++
+[NOTE]
+.__enscript__ and non-ascii characters
+==========================================
+__enscript__ does not support UTF-8. Therefore, if one uses a non-ASCII caharacter in the text token (__-w__) of __ssss-plit__, __enscript__ will output a warning. Using the option __--missing-characters__ helps figuring out what character is “wrong”.
+==========================================
++
+------------------------------------------
+lerouge@lilith % cd BACKUP-secret_share
+lerouge@lilith % for file in *.shared_secret; do enscript $file --missing-characters --output-file=$file.ps
+
+lerouge@lilith %
+------------------------------------------
++
+. set better mode on all those files
++
+------------------------------------------
+lerouge@lilith % cd BACKUP-secret_share
+lerouge@lilith % chmod u-w, go-rwx .
+lerouge@lilith % chmod u-w, go-rwx *
+lerouge@lilith %
+------------------------------------------
++
+. for each postcript file
+[arabic]
+ .. copy it onto a unique USB device,
++
+[IMPORTANT]
+.Unique vs. quorum
+==========================================
+One USB device is not absolutely required for each piece of the secret. But at the very least, one must use as many USB devices as ⌈<number_of_trusted_people> ÷ <quorum>⌉.
+
+The idea is that **no** electronic device (whatever its type; USB device, printer, PC, etc.) “sees”, one way or another, as many secrets as the required quorum (besides the clean room environment, of course).
+==========================================
++
+ .. go to a unique place to print it,
+ .. check the printed version is the same as hte one in the file in the clean room environment (once the bus came, it is too late…).
+
+
+//////////////////////////////////////////
+http://unix.stackexchange.com/questions/17406/how-to-convert-txt-to-pdf
+
+a2ps
+convert
+vim example.txt -c "hardcopy > man_xz.pdf | q"
+paps
+text2pdf -- not in Debian
+enscript NOT utf8
+ enscript -B --margins=10:10: -o outputfile.ps -f Courier@7.3/10 inputfile
+ ps2pdfwr outputfile.ps newfile.pdf
+ http://pastebin.com/raw/XQnRjtnR
+ enscript file.txt --output=- | ps2pdf - > file.pdf 
+ enscript lorem.txt -o - | ps2pdf - lorem.pdf
+//////////////////////////////////////////
+
+
+==== Share both
+
+
+Actually give to each chosen person
+
+. in a sealed enveloppe
+  ** a printed share of the secret password to decrypt the master|primary key and its subkeys encrypted archive,
+  ** a printed share of the passphrase,
+  ** eventually, a USB device with a numeric version of the shared secret in text and postscript format,
+. the master|primary key and its subkeys encrypted archive
+ ** on a USB device in a sealed enveloppe for those not having a __GnuPG__ key,
+ ** XOR in a file encrypted with the public key of the personfootnote:[At that point, it means one must have some trust in the __GnuPG__ key protection of the aforementionned person…],
+. the name of a few other persons,
+. the number for the quorum.
+
+
+
+
+=== The day after the bus
+
+
+==== Reveal the master|primary key and its subkeys
+
+. gather the required minum number of shares (the quorum)
++
+------------------------------------------
+someone@somemachine % ssss-combine -t 10 -x
+Enter 10 shares separated by newlines:
+Share [1/10]: John_01-02-c168724435e2ffe97e338fb449655f45365f502cad0068c17d4bdc23de20e0166ef7976498256d6f4b50206c77912c
+ […]
+Share [10/10]: John_01-07-7fd0d98a30d917b87353f45cfa3d9ca0b62fec4b45536a82e0ac119bac2123981b61a8b485ae715eb7fbb45b9ea6c3
+Resulting secret: <password_to_be_shared_in_hexadecimal>
+someone@somemachine %
+------------------------------------------
++
+. decode the password from hexadecimal to our alphabet
++
+------------------------------------------
+someone@somemachine % echo -n '<password_to_be_shared_in_hexadecimal>' | xxd -revert -plain
+<password_to_be_shared>
+someone@somemachine %
+------------------------------------------
++
+. enjoy (or not)
+. decrypt the master|primary key and its subkeys archive
++
+------------------------------------------
+omeone@somemachine % gpg --decrypt John.tar.xz.gpg
+
+------------------------------------------
+
+[NOTE]
+.Think about the baseball bat…
+==========================================
+and take care of this key. That's a dead man's private key but still a fucking private key!
+==========================================
+
+
+==== Reveal the passphrase
+
+. gather the required minum number of shares
++
+------------------------------------------
+someone@somemachine % ssss-combine -t 10 -x
+Enter 10 shares separated by newlines:
+Share [1/10]: John_02-01-089b1188959e4bbe6990f20d09fc1f87d8e2eb7bf45554514a9d356642abed3cd98df74af0b74fea86b43582d3f9950b57c4
+ […]
+Share [10/10]: John_02-14-4f5553170c9c16dbc854917cec0fc3f39bc94eea20fa7814de4d797e0f043f6e4c8e2a0b459eb51100c714ae6b622eaf594e
+Resulting secret: <passphrase_to_be_shared_in_hexadecimal>
+------------------------------------------
++
+. decode the passphrase from hexadecimal to our alphabet
++
+------------------------------------------
+someone@somemachine % echo -n '<passphrase_to_be_shared_in_hexadecimal>' | xxd -revert -plain
+<passphrase_to_be_shared>
+someone@somemachine %
+------------------------------------------
++
+. enjoy (or not)
+
+
+==== Setup __GnuPG__
+
+. RTFM!
+. setup __GnuPG__ to use the (uncrypted) master|primary key
+. uncrypt whatever has to be uncrypted using the passphrase
+. enjoy!
+
+
+
+
+
+
+
+[IMPORTANT]
+.Clean room environment
+==========================================
+At that stage this is the end of the clean room environment.
+
+Following steps are done in a “normal”, connected, day-to-day environment.
+
+Nonetheless, in this “normal” daily envirnment, one cannot have any private key stolen (as the master|primary is non-existing and subkeys are on the __GnuPGcard__).
+
+And one cannot sign (certify) another key without grabing the __GnuPGcard__ with the master|primary (secret) key and make some changes to the __GnuPG__ environment.
+==========================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[id_setup_keyserver_communication]]
+== Setup key server communications
+
+
+
+
+__GnuPG__ is delegating communication with key servers to __dirmngr__ application.
+
+We want to use the pool of key servers __hkps://hkps.pool.sks-keyservers.net__ with their CA certificate stored in $GNUPGHOME/keyservers_certificates/sks-keyservers.netCA.pem__ (certificate is available here: https://sks-keyservers.net/sks-keyservers.netCA.pem).
+
+Check __dirmngr__ has the correct configuration file.
+
+__keyserver-options__ are still in __gpg.conf__ but the two main options about which key server to use (option __keyserver__) and the certificate of the key server to use (option __hkp-cacert__) are part of configuration file __dirmngr.conf__.
+
+
+[NOTE]
+.Bug? — include-disabled
+==========================================
+__gpg: keyserver option 'include-disabled' is unknown__
+
+but this oiption is (still) listed in __gpg(1)__.
+==========================================
+
+
+
+
+=== Parcimonie
+
+
+FIXME- TODO -FIXME
+
+Parcimonie is a daemon that slowly refreshes keyring from a keyserver over Tor. It uses a randomized sleep, and fresh Tor circuits for each key. 
+
+
+[NOTE]
+.Bug? — 
+==========================================
+https://riseup.net/en/security/message-security/openpgp/best-practices#refresh-your-keys-slowly-and-one-at-a-time is saying “You should not use gpg --refresh-keys or the refresh keys menu item on your email client because you disclose to anyone listening, and the keyserver operator, the whole set of keys that you are interested in refreshing.”
+
+But https://riseup.net/en/security/message-security/openpgp/best-practices#use-the-sks-keyserver-pool-instead-of-one-specific-server-with-secure-connections is saying “Now your interactions with the keyserver will be encrypted via hkps, which will obscure your social relationship map from anyone who may be snooping on your traffic. For example, if you do a gpg --refresh-keys on a keyserver that is hkp only, then someone snooping your traffic will see every single key you have in your key ring as you request any updates to them. That is pretty interesting information.”
+==========================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[id_publickey_publication]]
+== Public key publication
+
+
+
+
+[[id_publickey_publication_keyserver]]
+=== To public key servers
+
+
+[WARNING]
+.Requirement — __dirmngr__ configuration
+==========================================
+This part requires <<id_setup_keyserver_communication>>.
+==========================================
+
+
+==== Publication
+
+------------------------------------------
+lerouge@lilith % gpg --send-keys --keyserver 
+gpg: using character set 'utf-8'
+gpg: sending key 0x5A7A8A1FD04CBBF7 to hkps://hkps.pool.sks-keyservers.net
+lerouge@lilith %
+------------------------------------------
+
+
+==== __GnuPGcard__ update
+
+------------------------------------------
+lerouge@lilith % gpg --card-edit
+ […]
+gpg/card> 
+gpg/card> admin
+Admin commands are allowed
+
+gpg/card>
+gpg/card> url
+URL to retrieve public key: https://sks-keyservers.net/pks/lookup?op=get&search=0x5A7A8A1FD04CBBF7
+FIXME
+gpg/card>$
+gpg/card> quit
+lerouge@lilith %
+------------------------------------------
+
+
+
+
+[[id_publickey_publication_signing_party]]
+=== For a keysigning party
+
+
+.Reference
+* https://wiki.debian.org/Keysigning#Step_3:_Make_your_public_key_publichttps://wiki.debian.org/Keysigning
+
+
+[WARNING]
+.Requirement — __dirmngr__ configuration
+==========================================
+It might be easier for those signing the key to retrieve it from a key server than from an email of a USB key.
+
+In this case, this part also requires <<id_setup_keyserver_communication>>
+==========================================
+
+[WARNING]
+.Requirement — deb:__signing-party__.
+==========================================
+This part requires deb:__signing-party__.
+
+Printing in another format than A4 requires deb:__libpaper-utils__.
+==========================================
+
+
+.CLI — gpg-key2ps — Generate public key fingerprint slip
+------------------------------------------
+gpg-key2ps \
+  --paper-size | -p a4 \	-- paper size (format other than A4 requires libpaper (deb:libpaper-utils) as mentionned in gpg-key2ps(1)
+  --show-subkeys \			-- show subkeys; irrelevant but let's be public
+  --revoked-style strike \	-- strike through revoked keys
+  -1 \							-- print on one column only (long UIDs)
+  <key_id> \
+  > $GNUPGHOME/\<lerouge@z.o\>-5A7A8A1FD04CBBF7.public.key-for_keysigning.ps
+------------------------------------------
+
+------------------------------------------
+gpg-key2ps -p a4 -s -r strike -1 5A7A8A1FD04CBBF7 > \<lerouge@z.o\>-5A7A8A1FD04CBBF7.public.key-for_keysigning.ps
+------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[id_key_switching]]
+== Key switching
+
+
+
+=== Environment preparation
+
+In the local configuration directory, prepare
+
+* __gnupg.skel__ (FIXME- copy it into /etc/skel/ -FIXME)
+* __gnupg-3D7A__
+* __gnupg__
+
+
+==== gnupg.skel
+
+Content of this directory is:
+
+* the public key,
+* the export for a keysigning party,
+* the authentication subkey for SSH,
+* the directory __keyservers_certificates/__ with certificates of key servers used (at least the certificate for the key server set in __dirmngr.conf__),
+* configuration files
+ ** __dirmngr.conf__,
+ ** __gpg-agent.conf__,
+ ** __gpg.conf__.
+
+
+__.gnupg/__ is aliased to __~/dot/gnupg/__.
+
+
+
+
+
+
+
+=== To install on a new environment
+
+[NOTE]
+.Two usages
+==========================================
+This is the same process when going back to use the daily __GnuPGcard__ on the machine where the __GnuPGcard__ with the master|primary (private) key was used (to sign / certify another key for instance).
+==========================================
+
+. echo $GNUPG
+%
+. kill -9 gpg-qgent
+. gpg --K
+unsing 'utf-8'
+keybox '/home/  /pubring.kbx' created
+key 0x5A7 BBF7: accepted as trusted
+. gpg --k
+unsing 'utf-8'
+key 0x5A7 BBF7: accepted as trusted
+
+NOTE: private-keys-v1.d/ not created
+. plug the __GnuPGcard__
+. gpg --card-status
+ list but sub slots empty
+NOTE: private-keys-v1.d/ create and populated with 83D6…8C75.key
+. gpg --card-edit
+.. gpg> fetch
+
+y
+processed:1
+imported:1
+.. gpg> list
+
+>
+#
+#
+#
+gpg> q
+. gpg -k
+. gpg -K
+sec>
+ unknown
+ssb
+ssb
+ssb
+. recup trustdb.gpg ou backup
+
+. cd to_be_signed/
+. gpg --fetch-keys <key_id> 
+  XOR gpg --import key-gpg-<who>-<key_id>.asc
+. gpg --lsign-key 
+ XOR gpg --sign-key <key_id>
+
+. gpg --armor --output ../signed/fixme --export <key_id>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[id_other_application_configuration]]
+== Other applications configuration
+
+
+
+
+In this part, one setup other applications or services that use the __GnuPG__ keys. Those applications or services are:
+
+* SSH authentication (see <<id_other_application_configuration_ssh_authentication>>),
+* __pass__ application (see <<id_other_application_configuration_pass>>),
+* __cryptsetup__ and more specifically LUKS crypto-container (see <<id_other_application_configuration_cryptsetup>>),
+* remote usage of the __GnuPGcard__ and its keys (see <<id_other_application_configuration_remote_usage>>),
+* __Claws__ application (see <<id_other_application_configuration_claws>>),
+* __Mutt__ application (see <<id_other_application_configuration_mutt>>).
+
+
+
+
+[[id_other_application_configuration_ssh_authentication]]
+=== SSH authentication
+
+
+A key with authentication capability can be used to authenticate against an SSH server.
+
+Three steps:
+
+. export the (authentication) subkey in SSH format,
+. add the authentication subkey to the SSH server authorized keys,
+. setup __GnuPG__ to present the key when SSH requires it.
+
+
+==== Export the (authentication) subkey
+
+------------------------------------------
+lerouge@lilith % gpg --export-ssh-key --output /tmp/\<lerouge@z.o\>-subkey_authentication_ssh.public.key
+gpg: using character set 'utf-8'
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+lerouge@lilith %
+------------------------------------------
+
+
+==== Add (authentication) subkey to SSHd
+
+Add the content of ++<lerouge@z.o>-subkey_authentication_ssh.public.key++ to the ++~/.ssh/authorized_keys++ (or ++/etc/ssh/user_key/authorized_keys.<login>++) file on the remote machine.
+
+
+==== Setup __GnuPG__ / SSH
+
+Two things to setup:
+
+. __gpg-agent__,
+. the shell to have __$SSH_AUTH_SOCK__.
+
+.gpg-agent.conf
+------------------------------------------
+## SSH authentication
+## enable the OpenSSH agent protocol
+##  the agent protocol used by OpenSSH through a separate socket)
+enable-ssh-support
+## set the time a cache entry used for SSH keys is valid to n seconds
+default-cache-ttl-ssh 900
+## set the maximum time a cache entry used for SSH keys is valid to n
+max-cache-ttl-ssh 1200
+------------------------------------------
+
+
+.__ZSH__ configuration (++zshenv++) — snippet
+------------------------------------------
+## gnupg-agent | gpg-agent
+if [ "$\{gnupg_SSH_AUTH_SOCK_by:-0\}" -ne $$ ]; then
+  export SSH_AUTH_SOCK="/run/user/${UID}/gnupg/S.gpg-agent.ssh"
+fi
+------------------------------------------
+
+
+==== Services to update
+
+* GitHub
+
+
+==== QA
+
+echo $SSH_AUTH_SOCK
+
+ll /run/user/$UID/gnupg/S.gpg-agent.ssh
+
+ssh -vvv <hostname_remote>
+
+
+==== Legacy / X environment
+
+
+
+When inserting the USB __GnuPGcard__, the authentication key is made available to __GnuPG__ and therefore SSH.
+
+------------------------------------------
+lerouge@lilith % ssh-add -l
+4096 a6:4c:39:38:32:c2:38:7b:a0:a8:fe:63:a3:1c:f8:07 cardno:0005000024E0 (RSA)
+4096 9f:5b:98:f1:64:f0:e2:bb:d4:57:5b:73:7e:cc:23:de /home/lerouge/.ssh/id_rsa (RSA)
+lerouge@lilith %
+------------------------------------------
+
+The whole point is to stop ++ssh-agent++ to let __GnuPG__ (++gpg-agent++) provide the key… and to not forget to add the (authentification) __GnuPG__ subkey to the ++~/.ssh/authorized_keys++ (or ++/etc/ssh/user_key/authorized_keys.<login>++) file on the remote machine.
+
+Regarding __XFCE__ according to http://docs.xfce.org/xfce/xfce4-session/advanced#ssh_and_gpg_agents[]footnote:[Thanks Corsac !], one should run
+
+------------------------------------------
+lerouge@lilith % xfconf-query -c xfce4-session -p /startup/ssh-agent/enabled -n -t bool -s false
+lerouge@lilith %
+------------------------------------------
+
+[NOTE]
+.Logout
+==========================================
+Logout/login is required to disable auto-starting of ++ssh-agent++.
+==========================================
+
+But ++ssh-agent++ is also launched by ++/etc/X11/Xsession.d/90x11-common_ssh-agent++ (installed by deb:__x11-common__). Remove it.
+
+
+
+
+++gpg-agent++ is started by two elements:
+
+. ++/etc/X11/Xsession.d/90gpg-agent++footnote:[installed by deb:__gnupg-agent__],
+. __XFCE__.
+
+The first one starts an agent taking into account ++~/.gnupg/gpg-agent.conf++ but +$GPG_AGENT_INFO++ is not exported (made available) to the X session. It is not stopped when exiting the X session either.
+
+The second one does not take into account ++~/.gnupg/gpg-agent.conf++ but exports (makes available) ++$GPG_AGENT_INFO++ to the X session. It is also stopped when exiting the X session.
+
+.One must add the following instructions to __ZSH__ configuration (++zshenv++)
+------------------------------------------
+## gnupg-agent | gpg-agent
+if [ "$\{gnupg_SSH_AUTH_SOCK_by:-0\}" -ne $$ ]; then
+  export SSH_AUTH_SOCK="$HOME}/.gnupg/S.gpg-agent.ssh"
+fi
+------------------------------------------
+
+
+
+
+
+
+
+
+
+[[id_other_application_configuration_pass]]
+=== __pass__
+
+
+See <<id_usage_pass>> for the use case.
+
+deb:__pass__.
+
+
+Add the key heaxadecimal signature (or ID) (not the __fingerprint__ or __keygrip__) to the file __$PASSWORD_STORE_DIR/.gpg-id__.
+
+
+
+
+[[id_other_application_configuration_cryptsetup]]
+=== Cryptsetup
+
+
+See <<id_usage_open_luks_cryptocontainer>> for the use case.
+
+To prepare the cryptocontainer, see ++tip-nix-crypto_filesystem-cryptsetup_luks_gpg2++.
+
+
+
+
+[[id_other_application_configuration_git]]
+=== Git
+
+See <<id_usage_git>> for the use case.
+
+deb:__git__.
+
+
+.Configuration — Git — gitconfig
+------------------------------------------
+ [user]
+	## GPG signing key
+	signingkey = 5A7A8A1FD04CBBF7
+
+------------------------------------------
+
+
+
+
+[[id_other_application_configuration_remote_usage]]
+=== Remote usage
+
+
+See <<id_usage_remote>> for the use case.
+
+The key to achieve this is the option __--extra-socket__ found in __gpg-agent__(5). Then ressources given in <<id_preamble_ressource>> provided all the information required.
+
+
+There are three configuration files to modify:
+
+. on the local machine (the one having the __GnuPGcard__ physically plugged in)
+ ** __$(GNUPGHOME)/gpg-agent.conf__ -- see <<id_remote_conf_local_gpgagent>>,
+ ** __$(HOME)/.ssh/config__ -- see <<id_remote_conf_local_sshconfig>>,
+. on the remote machine
+ .. __/etc/ssh/sshd_config__ -- see <<id_remote_conf_remote_sshdconfig>>,
+ .. restart sshd.
+
+[[id_remote_conf_local_gpgagent]]
+.Configuration — Local machine — __$(GNUPGHOME/gpg-agent.conf__
+------------------------------------------
+##
+## remote usage
+##
+## tells pinentry to ignore the session where gpg is running and only consider
+##  the DISPLAY variable when gpg-agent is started
+## so usefull when local is in an X
+#keep-display
+## setup a Unix domain socket forwarding from a remote machine to this
+##  socket on the local machine.
+##  A gpg running on the remote machine may then connect to the
+##  local gpg-agent and use its private keys. This enables decrypting or
+##  signing data on a remote machine without exposing the private keys
+##  to the remote machine.
+## FIXME- check wrt systemd and /run (where sockets are supposed to be) -FIXME
+extra-socket ~/.gnupg/S.gpg-agent.remote
+------------------------------------------
+
+[[id_remote_conf_local_sshconfig]]
+.Configuration — Local machine — __$(HOME)/.ssh/config__
+------------------------------------------
+Host <host_id>
+	Hostname <fqdn_remote_machine>
+	User <login_on_remote_machine>
+	## forward to remote_machine the local_machine GnuPG agent socket
+	RemoteForward $(GNUPGHOME)/S.gpg-agent $(GNUPGHOME)/S.gpg-agent.remote
+	## fail hard
+	ExitOnForwardFailure yes
+------------------------------------------
+[WARNING]
+.Variable expansion
+==========================================
+__OpenSSH__ is not expanding environment variables. It means that path used for the option __RemoteForward__ must be fully qualified (such as __/home/your_login/.gnupg/__).
+==========================================
+
+[NOTE]
+.CLI version
+==========================================
+This configuration snippet can be replaced by the following command:
+------------------------------------------
+$ ssh -R /home/<login_remote>/.gnupg/S.gpg-agent:/home/<login_local>/.gnupg/extra-socket <fqdn_remote_machine>
+------------------------------------------
+==========================================
+
+
+[[id_remote_conf_remote_sshdconfig]]
+.Configuration — Remote machine — __/etc/ssh/sshd_config__
+------------------------------------------
+## remove an existing Unix-domain socket file for local or remote port
+##  forwarding before creating a new one
+##  (openssh is not removing it by default on closing the connection)
+##  used for remote usage of GnuPG
+## TODO- encompass in a Match directive (on login using GnuPG) -TODO
+StreamLocalBindUnlink   yes
+------------------------------------------
+
+[NOTE]
+.CLI version
+==========================================
+If __sshd_config__ cannot be modified, it can be replaced by the following command at the promp or in __.zlogout__).
+------------------------------------------
+<remote_machine> $ rm /home/<login_remote>/.gnupg/S.gpg-agent
+------------------------------------------
+==========================================
+
+
+
+
+[[id_other_application_configuration_claws]]
+=== __Claws__
+
+
+FIXME
+
+
+
+
+[[id_other_application_configuration_mutt]]
+=== __Mutt__
+
+
+FIXME
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[id_test]]
+== Tests
+
+
+
+
+------------------------------------------
+lerouge@lilith % cd /tmp
+lerouge@lilith % echo "this is signed" > signed.txt
+lerouge@lilith % echo "this is encrypted" > encrypt.txt
+lerouge@lilith % gpg -r lerouge@z.o -ae encrypt.txt
+gpg: using character set 'utf-8'
+gpg: key 0x5A7A8A1FD04CBBF7: accepted as trusted key
+gpg: using subkey 0xCA5B30F08255FBB0 instead of primary key 0x5A7A8A1FD04CBBF7
+gpg: This key belongs to us
+gpg: reading from 'encrypt.txt'
+gpg: writing to 'encrypt.txt.asc'
+gpg: RSA/CAMELLIA256 encrypted for: "0xCA5B30F08255FBB0 John Doe <lerouge@z.o>"
+lerouge@lilith %
+lerouge@lilith % gpg -s signed.txt
+FIXME
+lerouge@lilith %
+lerouge@lilith %
+lerouge@lilith % gpg2 -d encrypt.txt.asc
+FIXME
+lerouge@lilith %
+------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[[id_maintenance]]
+== GnuPG / key maintenance
+
+
+
+
+[[id_maintenance_extend_key_validity]]
+=== Extend the key validity
+
+
+
+[[id_maintenance_extend_key_validity_reminder]]
+==== Set a reminder reminder
+
+
+Setup a reminder to update the validity date of the master|primary key and the sub keys one month before their expiry dates.
+
+task add proj:babasse priority:H due:2021-10-21 wait:2021-09-21 "Extend master keys expiry date"
+
+task add proj:babasse priority:H due:2018-10-22 wait:2018-09-22 "Extend subkeys expiry date"
+
+
+==== Set a new validity date
+
+FIXME
+
+
+
+
+[[id_maintenance_periodic_backup]]
+=== Periodic backup
+
+
+==== Trust
+
+
+------------------------------------------
+$ gpg --export-ownertrust > $GNUPGHOME/BACKUP-trust-`date +%Y%m%d_%H%M`
+
+$ gpg --import-ownertrust < $GNUPGHOME/BACKUP-trust-<date>
+------------------------------------------
+
+
+
+
+[[id_maintenance_trust]]
+=== Trust
+
+
+ --update-trustdb
+
+ --check-trustdb
+
+
+
+[[id_maintenance_refresh]]
+=== Refresh keys
+
+
+ --refresh-keys
+
+
+
+
+[[id_maintenance_change_pin]]
+=== Change __GnuPGcard__ PIN / Unblock PIN
+
+------------------------------------------
+lerouge@lilith % gpg --card-edit
+gpg: using character set 'utf-8'
+gpg/card> admin
+Admin commands are allowed
+
+gpg/card> passwd
+FIXME
+
+gpg/card> verify
+FIXME
+
+gpg/card> q
+lerouge@lilith %
+------------------------------------------
+
+To change the PIN enter the command ++passwd++; three PINs can be set
+
+* __PIN__,
+* __admin PIN__,
+* __reset code__.
+
+That is also the place to unblock the card when three (or more) wrong PINsfootnote:[PIN not “admin PIN” as this destroys the __GnuPGcard__] have been entered.
+
+Use the command ++verify++ at the end to check out everything is OK.
+
+
+
+
+[[id_maintenance_revoke_key]]
+=== Use revocation certificate
+
+
+See <<id_backup_revocation_certificate>> for the revocation certificate creation.
+
+FIXME
+
+
+
+
+
+
+
+
+
+
+[[id_usage]]
+== Usage
+
+
+
+
+Some usage identified:
+
+* sign others' key to build the web trust (see <<id_usage_sign_key>>),
+* authenticate to SSH server (see <<id_usage_authentication_ssh>>),
+* store passwords (see <<id_usage_pass>>),
+* open a LUKS crypto-container (see <<id_usage_open_luks_cryptocontainer>>),
+* sign or encrypt emails (see <<id_usage_email>>),
+* authenticate to login locally (see <<id_usage_authentication_locally>>),
+* sign Git's commit (see <<id_usage_git>>),
+* encrypt XMPP / Japper / Gajim communications (see <<id_usage_gajim>>),
+* authenticate a certificate (see <<id_usage_authenticate_certificate>>),
+* sign a __Debian__ package (see <<id_usage_deb_signature>>),
+* encrypt a file (see <<id_usage_encrypt_file>>).
+
+
+
+
+[[id_usage_sign_key]]
+=== Sign a key
+
+
+FIXME
+
+
+[WARNING]
+.Key
+==========================================
+To sign someone else key, the (master|primary) key is required (the only one with the capability __certify__).
+
+In our use case, this key is kept apart on another __GnuPGcard__ and only used with the pinpad reader.
+==========================================
+
+
+==== Environment preparation
+
+. open a new shell
+. set $GNUPGHOME to __dot/gnupg-3D7A__
++
+------------------------------------------
+lerouge@lilith % export GNUPGHOME=/home/lerouge/dot/gnupg-3D7A
+lerouge@lilith %
+------------------------------------------
++
+. check
++
+------------------------------------------
+lerouge@lilith % echo $GNUPGHOME
+FIXME
+lerouge@lilith %
+lerouge@lilith % gpg -k
+FIXME
+lerouge@lilith % gpg -K
+FIXME
+lerouge@lilith %
+------------------------------------------
++
+. FIXME- pas de import -> voir section au début pour configurer gnupg et gnupg-3D7A
+
+
+==== Key importation
+
+. get Bob's public key information: key ID, fingerprint and keygrip
+. (double) check Bob's
+ ** ID (name, picture mainly)
+ ** key fingerprint
+ ** keygrip,
+. import Bob's key from server (or from a file but that makes less possibilities to cross-check information)
++
+------------------------------------------
+gpg --recv-keys '<key_id>'
+
+------------------------------------------
++
+. check fingerprint
++
+------------------------------------------
+gpg --fingerprint '<key_id>'
+
+------------------------------------------
+
+
+==== Key signature
+
+. sign
++
+------------------------------------------
+lerouge@lilith % gpg --sign-key '<key_id>'
+FIXME
+lerouge@lilith %
+------------------------------------------
++
+. check
++
+------------------------------------------
+lerouge@lilith % gpg --list-sigs '<key_id>'
+
+FIXME- add lool -FIXME
+
+lerouge@lilith %
+------------------------------------------
+
+
+[IMPORTANT]
+.Local signature
+==========================================
+Instead of using command __--sign-key__, one can use command __--lsign-key__. In this case the key with our signature will not be exportable and therefore will not be published on any key server.
+
+And we wont't be able to export it from our “certification” keyring to import it in out “daily” keyring…
+==========================================
+
+
+==== Signed key exportation
+
+Once signed with the master|primary (certification) key, one should export the Bob's key to then import it in our daily keyring. It can be done either by replushing it to the key server xor exporting a file.
+
+. export to key server
++
+------------------------------------------
+lerouge@lilith % gpg --send-key '<key_id>'
+ fixme
+lerouge@lilith %
+------------------------------------------
+
+* XOR
+
+. export to a file
++
+------------------------------------------
+lerouge@lilith % cd .gnupg-3D7A
+lerouge@lilith % gpg --armor --output signed/<key_id>.asc --export <key_id>
+
+lerouge@lilith %
+------------------------------------------
+
+
+==== Signed key importation
+
+Now one can import the Bob's signed key into our daily keyring (the one with the master|primary key removed and the subkeys on the __GnuPGcard__). It can be done by fetching the key fom a key server xor importing it from the file created at the previous step.
+
+
+. import Bob's key from file
++
+------------------------------------------
+lerouge@lilith % cd .gnupg
+lerouge@lilith % gpg --import ../dot/gnupg-3D7A/signed/<key_id>
+
+lerouge@lilith %
+------------------------------------------
+
+* XOR
+
+. fetch Bob's key from a key server
++
+------------------------------------------
+lerouge@lilith % gpg --recv-keys '<key_id>'
+
+lerouge@lilith %
+------------------------------------------
++
+. check
++
+------------------------------------------
+lerouge@lilith % gpg --list-sigs <key_id>
+
+lerouge@lilith %
+------------------------------------------
+
+
+
+
+[[id_usage_authentication_ssh]]
+=== Authenticate to SSH server
+
+If setup properly (see <<id_ssh_authentication>>), there is nothing to do but
+
+. ssh <hostname_remote>
+. enter the PIN.
+
+
+
+
+
+
+[[id_usage_encrypt_file]]
+=== Encrypt a file
+
+FIXME
+
+
+
+
+[[id_usage_open_luks_cryptocontainer]]
+=== Open a LUKS crypto-container
+
+
+This is to open a LUKS crypto-container with a keyfile encrypted with the GPG key.
+
+------------------------------------------
+gpg
+  --try-secret-key <keyname>	-- for hidden recipients GPG needs to know the keys to use for trial decryption (as our GPG is using option __throw-keyids__ or __hidden-recipient__)
+  --decrypt | -d					-- decrypt the file given on the command line
+  --quiet   | -q					-- be quiet
+  <filename_key>					-- name of the file with the key encrypted
+------------------------------------------
+
+.CLI — Open the crytpcontainer
+------------------------------------------
+$ gpg --try-secret-key lerouge -dq ~/data/trousseau/keyfile-azo.asc | sudo cryptsetup luksOpen --key-file=- /dev/loop0 azo
+$ 
+------------------------------------------
+
+
+
+
+
+[[id_usage_remote]]
+=== Remote usage of the __GnuPGcard__
+
+
+Configuration: see <<id_other_application_configuration_remote_usage>>.
+
+.Use case
+Use a (local) __GnuPGcard__ to sign, encrypt or decrypt things on a remote machine.
+
+
+The public key must be imported from a
+
+** URI (++gpg --recv-key <key_id>++ but this requires __dirmngr__ on the remote machine),
+** local copy (++gpg --import <path_key>++).
+
+[NOTE]
+.__GnuPG__ directory
+==========================================
+The __$GNUPGHOME__ directory should exist before doing the first ssh. Otherwise the connection will failed thanks to the option __ExitOnForwardFailure__ that is enabled.
+==========================================
+
+Then the key can be used normally.
+
+. ++ssh <fqdn_remote_machine>++
+. enter key passphrase or PIN (if using a __GnuPGcard__)
+. ++gpg --clearsign <path_file_to_sign>++
+. enter PIN of the key (in the __GnuPGcard__ plugged the local machine).
+
+
+
+
+[[id_usage_email]]
+=== Email
+
+
+[[id_usage_email_mutt]]
+==== __Mutt__
+
+FIXME
+
+[[id_usage_email_claws]]
+==== __Claws__
+
+FIXME
+
+
+
+
+[[id_usage_authentication_locally]]
+=== Authenticate to login locally
+
+
+FIXME- try with GnuPGcard but mainly do with __YubiKey__ (see planet.d.o.) -FIXME
+
+
+
+
+[[id_usage_git]]
+=== Git
+
+
+.Use case
+Sign each and every commit done in __Git__.
+
+
+
+Nothing to do as long as <<id_other_application_configuration_git>> is done.
+
+The subkey signature PIN is asked each time if the __forcesig__ option is enabled (see <<id_FIXME>>).
+
+
+
+
+
+
+[[id_usage_pass]]
+=== Pass
+
+
+.Use case
+There is no real use case here. __pass__ is a __GnuPG__ wrapper to manage passwords.
+
+
+==== Migration
+
+[NOTE]
+.Several keys
+==========================================
+It is possible to encrypt for several keys with __pass__. So one could have both an encryption subkey from a revoked key and a current encryption subkey. The point is that it is not possible to have two encryption subkeys on the __GnuPGcard__ (from __KernelConcept__ as there can be only three keys).
+==========================================
+
+.in a shell
+. export GNUPGHOME=/home/lerouge/tmp/gnupgold
+ ** echo $GNUPGHOME
+. plug old __GnuPGcard__
+. pass show <path_secret_to_migrate_old>
+ ** enter PIN
+. copy secret information
+
+.in another shell
+. plug new __GnuPGcard__
+. pass insert -m <path_secret_to_migrate_new>
+. paste secret information
+. pass show <path_secret_to_migrate_new>
+ ** enter PIN
+
+
+
+
+[[id_usage_gajim]]
+=== XMPP / Jabber / Gajim
+
+
+Use GnuPG key.
+
+. Menu __Edit__ / __Account__ / ++<account>++.
+. Tab __Personal information__.
+. Click on the button __Choose key…__ and select the right key.
+. Check option __Use GPG agent__.
+. Click on the button __Close__.
+. Validate the message asking to relogin.
+
+FIXME- nobody's listed -> set key and see what happens. But even if they appear what about those without GnuPG ? -FIXME
+
+[NOTE]
+.BUG — Nobody's listed in the roster when using __gpg-agent__
+==========================================
+------------------------------------------
+14:10 lerouge@niobe % gajim
+/home/lerouge/.local/share/gajim/plugins/gotr/ui.py:40: GtkWarning: Unknown property: GtkMenu.ubuntu-local
+  self.B.add_from_file(self.GTK_BUILDER_FILE_PATH)
+29/11/2016 14:10:40 (E) gajim.c.ged Error while running an even handler: <bound method Connection._nec_roster_received of <common.connection.Connection object at 0x3b4bc568090>>
+Traceback (most recent call last):
+  File "/usr/share/gajim/src/common/ged.py", line 93, in raise_event
+    if handler(*args, **kwargs):
+  File "/usr/share/gajim/src/common/connection_handlers.py", line 2126, in _nec_roster_received
+    self._send_first_presence)
+  File "/usr/share/gajim/src/common/connection.py", line 1902, in get_signed_presence
+    return self.get_signed_msg(msg, callback)
+  File "/usr/share/gajim/src/common/connection.py", line 253, in get_signed_msg
+    signed = self.gpg.sign(msg, keyID)
+  File "/usr/share/gajim/src/common/gpg.py", line 91, in sign
+    if result.status == 'key expired':
+AttributeError: 'Sign' object has no attribute 'status'
+------------------------------------------
+
+When unchecking __Use GPG agent__, __Gajim__ is asking for the passphrase. Not entering any is triggering the message “not connected with GPG” but contacts are listed.
+
+See also https://trac.gajim.org/ticket/8355[].
+==========================================
+
+
+[NOTE]
+.Gnome keyring
+==========================================
+__Gajim__ does not require deb:__gnome-keyring__ to work with __GnuPG__.
+==========================================
+
+[NOTE]
+.BUG — Option unavailable
+==========================================
+In menu __Help / Features__, __OpenPGP message encryption__ entry is checked.
+But check option __Use GPG agent__ is grayed out.
+
+Installing __python-gnupg__ (or __python3-gnupg__) is not an option as this one depends on deb:__gnupg1__).
+
+Working fine since last upgrade (deb:__gnupg__ ++2.1.16-2++).
+==========================================
+
+
+
+
+[[id_usage_authenticate_certificate]]
+=== Authenticate a certificate
+
+FIXME
+
+
+
+
+
+
+
+[[id_usage_deb_signature]]
+=== Sign a Debian package
+
+FIXME
+
+
+
+
+[[id_usage_sign_document_with_libreoffice]]
+=== Sign a document with __LibreOffice__
+
+
+FIXME
+
+
+
+
+
+
+
+
+
+
+
+
+// vim: set ft=asciidoc:
