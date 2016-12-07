@@ -2944,9 +2944,18 @@ FIXME
 
 
 [[id_test]]
-== Tests
+== Tests & QA
 
 
+
+
+.CLI — Checks — GnuPG / gpgconf — Configuration
+------------------------------------------
+lerouge@lilith % gpgconf --list-dirs
+lerouge@lilith % gpgconf --check-config
+FIXME- add details / UC -FIXME
+lerouge@lilith %
+------------------------------------------
 
 
 ------------------------------------------
